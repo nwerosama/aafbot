@@ -1,0 +1,9 @@
+/.vscode
+.env
+*.yml
+*.sh
+
+# only copy the compiled binary into container's filesystem
+/target/debug
+/target/release/
+!/target/release/aaf

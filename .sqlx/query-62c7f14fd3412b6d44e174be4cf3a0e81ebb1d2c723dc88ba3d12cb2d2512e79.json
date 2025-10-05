@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO autoresponders (guild_id, channel_id, keywords, response)\n      VALUES ($1, $2, $3, $4)\n        ON CONFLICT (guild_id, channel_id, keywords)\n        DO UPDATE SET response = EXCLUDED.response\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8",
+        "TextArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "62c7f14fd3412b6d44e174be4cf3a0e81ebb1d2c723dc88ba3d12cb2d2512e79"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM autoresponders WHERE guild_id = $1 AND keywords = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0755c64d517db4afba025226bd472755803af2a34c7141698658da89ae4ae909"
+}

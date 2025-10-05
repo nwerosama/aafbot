@@ -1,0 +1,6 @@
+[unstable]
+profile-rustflags = true
+
+[profile]
+dev.rustflags = ["-C", "target-cpu=native"]
+release.rustflags = ["-C", "target-cpu=ivybridge"]

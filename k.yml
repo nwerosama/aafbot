@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aaf
+
+spec:
+  replicas: 1
+  revisionHistoryLimit: 6
+  selector:
+    matchLabels:
+      app: aaf
+  template:
+    metadata:
+      labels:
+        app: aaf
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: aaf-app
+          image: ghcr.io/nwerosama/aafbot:sanke
+          imagePullPolicy: Always
+          env:
+            - name: DOCKER_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: aaf-secret
+                  key: DISCORD_TOKEN
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aaf-secret
+                  key: DATABASE_URL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9100
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9100
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "32Mi"
+            limits:
+              cpu: "1200m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aaf-service
+
+spec:
+  selector:
+    app: aaf
+  type: ClusterIP
+  ports:
+    - port: 9100
+      targetPort: 9100
+      name: health
