@@ -2,7 +2,7 @@ use {
   asahi::AsahiResult,
   poise::serenity_prelude::{
     AutocompleteChoice,
-    // ChannelId,
+    Channel,
     CreateAutocompleteResponse
   }
 };
@@ -50,15 +50,12 @@ async fn ar_add(
   ctx: super::PoiseContext<'_>,
   #[description = "Channel to respond in"]
   #[channel_types("Text")]
-  // channel: ChannelId,
-  // workaround, discord mustve broken something on their end as Poise is failing to parse it...
-  channel: String,
+  channel: Channel,
   #[description = "Keywords (separate each word by comma if wanting multiple for same response)"] keywords: String,
   #[description = "Response text to reply back to user with"] response: String
 ) -> AsahiResult {
   let guild_id = ctx.guild_id().expect("should be guild data present").get() as i64;
-  // let channel_id = channel.get() as i64;
-  let channel_id = channel.parse::<i64>().expect("expected valid channel id as integer");
+  let channel_id = channel.id().get() as i64;
 
   let kw: Vec<String> = keywords.split(',').map(|s| s.trim().to_string()).collect();
   let first_kw = kw.first().cloned().unwrap_or_else(|| "<blank>".to_string());

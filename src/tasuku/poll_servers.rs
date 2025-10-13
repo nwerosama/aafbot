@@ -5,7 +5,6 @@ use {
   asahi::{
     AsahiCoordinator,
     AsahiResult,
-    debug,
     error,
     info
   },
@@ -143,7 +142,10 @@ impl AsahiCoordinator for PollServers {
                   }
 
                   match store_session_entry(db, &pname, puptime).await {
-                    Ok(total) => debug!("Session entry for {pname} has been inserted into database, total session is {total} minutes"),
+                    #[cfg(not(feature = "production"))]
+                    Ok(total) => asahi::debug!("Session entry for {pname} has been inserted into database, total session is {total} minutes"),
+                    #[cfg(feature = "production")]
+                    Ok(_) => (),
                     Err(e) => error!("Failed to store session entry for {pname}: {e}")
                   }
                 }
