@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO players (name, total_played)\n    VALUES ($1, $2) ON CONFLICT (name)\n    DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played\n    RETURNING total_played",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_played",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4804679bc127538500c44e3f3d78331c908f0f7b8e420cee6d5db55e105f0151"
+}

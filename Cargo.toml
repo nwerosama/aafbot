@@ -1,11 +1,21 @@
 [package]
 name = "aafbot"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
 
 [dependencies]
-asahi = { git = "https://git.playground.red/nwerosama/asahi", branch = "master", features = ["prober", "sqlx-pg"] }
-poise = { git = "https://git.playground.red/nwerosama/poise", branch = "lock-serenity-commit" }
+asahi = { git = "https://git.playground.red/nwerosama/asahi", branch = "master", features = ["prober", "coordinator", "sqlx-pg"] }
+bytes = "1.10.1"
+dashmap = "6.1.0"
+farmsim = { version = "0.1.6", features = ["fs22", "fs25"] }
+futures = "0.3.31"
+http-body-util = "0.1.3"
+hyper = "1.7.0"
+lazy_static = "1.5.0"
+pin-project-lite = "0.2.16"
+poise = { git = "https://git.playground.red/nwerosama/poise", branch = "fix-poise" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "postgres"] }
 tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "signal"] }
 

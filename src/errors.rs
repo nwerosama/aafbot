@@ -51,10 +51,11 @@ pub async fn fw_errors(error: FrameworkError<'_, BotData, AsahiError>) {
         ctx.command().qualified_name
       );
       ctx
-        .reply("This command is only available to the bot owners, you're not one of them!")
+        .reply("This command is only usable by the developers and you're not one of them!")
         .await
         .expect("Error sending message");
     },
+    FrameworkError::UnknownCommand { msg, .. } => error!("PoiseUnknownCommand: {} tried to run a command that doesn't exist!", msg.author.name),
     other => error!("PoiseOtherError: {other:?}")
   }
 }

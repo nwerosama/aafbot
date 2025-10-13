@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT friendly, internal, ip, code FROM servers",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "friendly",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "internal",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "ip",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "5ecbf44e8e33834af81008e5acddaffa5a1ead40d8f4ffefaffd0bdc1d939bad"
+}

@@ -10,4 +10,5 @@ Early in development and work in progress, don't expect anything to happen so fa
 
 Notable features;-
 - Autoresponder
+- FS22/FS25 scanners
 - *rest to be determined due to slow development*

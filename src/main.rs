@@ -3,6 +3,7 @@ mod data;
 mod database;
 mod errors;
 mod events;
+mod tasuku;
 // https://cdn.toast-server.net/RustFSHiearachy.png
 // Using the new filesystem hierarchy
 
@@ -58,6 +59,8 @@ async fn main() {
     std::process::exit(1)
   }
 
+  tasuku::init(bot_data.database.clone()).await;
+
   let framework = Framework::builder()
     .options(FrameworkOptions {
       commands: commands::collect(),
@@ -110,7 +113,7 @@ async fn main() {
   .framework(framework)
   .data(bot_data)
   .status(OnlineStatus::Online)
-  .activity(ActivityData::custom("Sunflowers!!!"))
+  .activity(ActivityData::custom("Koi fishes are very nice!"))
   .await
   .expect("Error creating Serenity client");
 
