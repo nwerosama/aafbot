@@ -59,7 +59,7 @@ async fn main() {
     std::process::exit(1)
   }
 
-  tasuku::init(bot_data.database.clone()).await;
+  tasuku::init(bot_data.database.clone());
 
   let framework = Framework::builder()
     .options(FrameworkOptions {
