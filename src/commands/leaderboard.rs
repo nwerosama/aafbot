@@ -73,7 +73,7 @@ async fn list(ctx: super::PoiseContext<'_>) -> AsahiResult {
 #[poise::command(slash_command)]
 async fn search(
   ctx: super::PoiseContext<'_>,
-  player_name: String
+  #[description = "In-game name to search for, e.g Nwero"] player_name: String
 ) -> AsahiResult {
   let database = ctx.data().database.clone();
   let name = player_name.trim().to_lowercase();
@@ -97,7 +97,7 @@ async fn search(
       .await?;
 
     let m = if suggested.is_empty() {
-      "No such name found! Check spelling and retry".to_string()
+      "No such name found! Have they played enough in our servers?".to_string()
     } else {
       let list = suggested.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ");
       format!("No exact match! Possible suggested names: {list}")
