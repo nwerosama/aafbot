@@ -11,7 +11,7 @@ use {
 };
 
 /// Developer commands to interact the bot with
-#[poise::command(slash_command, owners_only, default_member_permissions = "ADMINISTRATOR", subcommands("echo"))]
+#[poise::command(slash_command, owners_only, default_member_permissions = "ADMINISTRATOR", subcommands("echo", "lbts"))]
 pub async fn dev(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
 /// Echo your message as a bot
@@ -48,6 +48,30 @@ async fn echo(
       return Ok(());
     }
   }
+
+  Ok(())
+}
+
+/// Sets the timestamp for when leaderboard was last reset
+#[poise::command(slash_command)]
+async fn lbts(
+  ctx: super::PoiseContext<'_>,
+  #[description = "Unix epoch timestamp"] timestamp: u64
+) -> AsahiResult {
+  sqlx::query!(
+    "INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+    "lb_data_collection_date",
+    timestamp.to_string()
+  )
+  .execute(&ctx.data().database)
+  .await?;
+
+  ctx
+    .say(format!(
+      "Successfully set <t:{timestamp}:D> as the leaderboard's data collection start date!"
+    ))
+    .await
+    .unwrap();
 
   Ok(())
 }
