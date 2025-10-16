@@ -83,12 +83,22 @@ async fn search(
     .await?;
 
   if let Some(plr) = entry {
+    let pos = sqlx::query_scalar!("SELECT COUNT(*) + 1 FROM players WHERE total_played > $1", plr.total_played)
+      .fetch_one(&database)
+      .await?
+      .unwrap_or(1);
+
     ctx
-      .send(CreateReply::default().content(format!(
-        "**Player name:** `{}`\n**Total played:** `{}`",
-        plr.name,
-        fmt_uptime(plr.total_played)
-      )))
+      .send(
+        CreateReply::default().content(
+          [
+            format!("**Position:** `#{pos}`"),
+            format!("**Player name:** `{}`", plr.name),
+            format!("**Total played:** `{}`", fmt_uptime(plr.total_played))
+          ]
+          .join("\n")
+        )
+      )
       .await
       .unwrap();
   } else {
