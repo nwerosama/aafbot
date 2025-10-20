@@ -126,10 +126,12 @@ impl AsahiCoordinator for PollServers {
               SERVERS_CACHE.insert(server.internal.clone(), data.clone());
               info!("Cache refreshed for {}", server.friendly);
 
-              let players = match data.dss {
-                Some(dss) => dss.slots.unwrap().players,
-                None => Vec::with_capacity(16)
-              };
+              let players = data
+                .dss
+                .as_ref()
+                .and_then(|d| d.slots.as_ref())
+                .map(|s| s.players.clone())
+                .unwrap_or_default();
 
               for player in players {
                 if !player.is_used.unwrap_or(false) {
