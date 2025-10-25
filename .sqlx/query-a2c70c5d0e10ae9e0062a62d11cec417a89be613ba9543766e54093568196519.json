@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO players (name, total_played) VALUES ($1, $2) ON CONFLICT (name)\n    DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a2c70c5d0e10ae9e0062a62d11cec417a89be613ba9543766e54093568196519"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO players (name, total_played)\n    VALUES ($1, $2) ON CONFLICT (name)\n    DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played\n    RETURNING total_played",
+  "query": "INSERT INTO players (name, total_played) VALUES ($1, $2) ON CONFLICT (name)\n    DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played\n    RETURNING total_played",
   "describe": {
     "columns": [
       {
@@ -19,5 +19,5 @@
       false
     ]
   },
-  "hash": "4804679bc127538500c44e3f3d78331c908f0f7b8e420cee6d5db55e105f0151"
+  "hash": "00a2b49f59ff739d382c705627be5365cc325fddc0e1afacd00e1a46bfb15866"
 }

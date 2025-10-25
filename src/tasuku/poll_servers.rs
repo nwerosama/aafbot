@@ -84,8 +84,7 @@ async fn store_session_entry(
   }
 
   let result = sqlx::query_scalar!(
-    "INSERT INTO players (name, total_played)
-    VALUES ($1, $2) ON CONFLICT (name)
+    "INSERT INTO players (name, total_played) VALUES ($1, $2) ON CONFLICT (name)
     DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played
     RETURNING total_played",
     name,
