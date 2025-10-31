@@ -1,13 +1,13 @@
+mod botstats;
 mod dev;
 mod leaderboard;
 mod settings;
-mod stats;
 
 use {
+  botstats::botstats,
   dev::dev,
   leaderboard::leaderboard,
-  settings::settings,
-  stats::stats
+  settings::settings
 };
 
 use {
@@ -21,7 +21,7 @@ use {
 pub type PoiseCmdData = Vec<poise::Command<BotData, AsahiError>>;
 pub type PoiseContext<'a> = poise::Context<'a, BotData, AsahiError>;
 
-pub fn collect() -> PoiseCmdData { vec![deploy(), dev(), leaderboard(), settings(), stats()] }
+pub fn collect() -> PoiseCmdData { vec![deploy(), dev(), leaderboard(), settings(), botstats()] }
 
 /// Deploy the commands
 #[poise::command(prefix_command, owners_only)]

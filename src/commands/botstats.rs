@@ -23,7 +23,7 @@ use {
 
 /// Fetches the bot statistics (nerd stats)
 #[poise::command(slash_command, install_context = "Guild", interaction_context = "Guild")]
-pub async fn stats(ctx: super::PoiseContext<'_>) -> AsahiResult {
+pub async fn botstats(ctx: super::PoiseContext<'_>) -> AsahiResult {
   let bot_name = ctx.cache().current_user().name.clone();
 
   let node_hostname = match var("DOCKER_HOSTNAME") {
