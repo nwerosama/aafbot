@@ -14,10 +14,6 @@ use {
   poise::{
     CreateReply,
     serenity_prelude::CreateEmbed
-  },
-  std::{
-    env::var,
-    process::Command
   }
 };
 
@@ -26,12 +22,9 @@ use {
 pub async fn botstats(ctx: super::PoiseContext<'_>) -> AsahiResult {
   let bot_name = ctx.cache().current_user().name.clone();
 
-  let node_hostname = match var("DOCKER_HOSTNAME") {
+  let node_hostname = match std::env::var("DOCKER_HOSTNAME") {
     Ok(h) => h.to_string(),
-    Err(_) => String::from_utf8(Command::new("hostname").output().unwrap().stdout)
-      .unwrap()
-      .trim()
-      .to_string()
+    Err(_) => String::from("HOSTNAME_NOT_SET")
   };
 
   let (sys_up, sys_mem, proc_up, proc_mem) = (get_uptime().system, get_memory().system, get_uptime().process, get_memory().process);

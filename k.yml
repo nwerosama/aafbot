@@ -20,6 +20,11 @@ spec:
         - name: aaf-app
           image: ghcr.io/nwerosama/aafbot:sanke
           imagePullPolicy: Always
+          env:
+            - name: DOCKER_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           envFrom:
             - secretRef:
                 name: aaf-secret
