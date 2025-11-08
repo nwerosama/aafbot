@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aaf
+  name: aaf-app
 
 spec:
   replicas: 1
   revisionHistoryLimit: 6
   selector:
     matchLabels:
-      app: aaf
+      app: aaf-app
   template:
     metadata:
       labels:
-        app: aaf
+        app: aaf-app
     spec:
       imagePullSecrets:
         - name: regcred
@@ -20,21 +20,9 @@ spec:
         - name: aaf-app
           image: ghcr.io/nwerosama/aafbot:sanke
           imagePullPolicy: Always
-          env:
-            - name: DOCKER_HOSTNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: DISCORD_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: aaf-secret
-                  key: DISCORD_TOKEN
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: aaf-secret
-                  key: DATABASE_URL
+          envFrom:
+            - secretRef:
+                name: aaf-secret
           livenessProbe:
             httpGet:
               path: /health
@@ -62,11 +50,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: aaf-service
+  name: aafbot-service
 
 spec:
   selector:
-    app: aaf
+    app: aaf-app
   type: ClusterIP
   ports:
     - port: 9100
