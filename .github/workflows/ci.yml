@@ -89,7 +89,7 @@ jobs:
             "auto_merge": false,
             "required_contexts": ["build"],
             "payload": {
-              "deployment_name": "aaf",
+              "deployment_name": "aaf-app",
               "container_name": "aaf-app",
               "image": "ghcr.io/${{ github.repository }}:sanke"
             }
