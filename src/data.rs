@@ -4,5 +4,7 @@ pub struct BotData {
   pub main_guild:  poise::serenity_prelude::GuildId,
   /// Lead developer
   pub notify_dev:  poise::serenity_prelude::UserId,
-  pub database:    sqlx::PgPool
+  pub database:    sqlx::PgPool,
+  /// Base url of the community site
+  pub site_url:    String
 }

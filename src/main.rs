@@ -32,6 +32,7 @@ use {
   },
   std::{
     borrow::Cow,
+    env::var,
     sync::Arc
   }
 };
@@ -51,7 +52,8 @@ async fn main() {
       GuildId::new(865673694184996885)
     },
     notify_dev:  UserId::new(190407856527376384),
-    database:    database::init().await
+    database:    database::init().await,
+    site_url:    var("AAF_SITE").expect("No 'AAF_SITE' key found!")
   });
 
   if let Err(e) = prepare_tables(&bot_data.database, "schemas").await {

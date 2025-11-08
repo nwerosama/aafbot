@@ -37,6 +37,7 @@ pub async fn leaderboard(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 #[poise::command(slash_command)]
 async fn list(ctx: super::PoiseContext<'_>) -> AsahiResult {
   let db = ctx.data().database.clone();
+  let website = ctx.data().site_url.clone();
   let entries = sqlx::query_as!(Player, "SELECT name, total_played FROM players ORDER BY total_played DESC LIMIT 50")
     .fetch_all(&db)
     .await?;
@@ -58,7 +59,13 @@ async fn list(ctx: super::PoiseContext<'_>) -> AsahiResult {
         CreateEmbed::default()
           .color(ctx.data().embed_color)
           .title("Top 50 players on AAF servers")
-          .description(format!("Data collected since <t:{date}:D>"))
+          .description(
+            [
+              format!("Data collected since <t:{date}:D>"),
+              format!("You can also find other 200 players on [our site!]({website}/leaderboard)")
+            ]
+            .join("\n")
+          )
           .fields(vec![("\u{200b}", first, true), ("\u{200b}", second, true)])
           .footer(CreateEmbedFooter::new("Data shown is updated in background periodically"))
       )
