@@ -111,6 +111,8 @@ impl AsahiCoordinator for PollServers {
     {
       Ok(servers) => {
         let mut tasks = FuturesOrdered::new();
+        let mut refreshed: Vec<String> = Vec::new();
+        let mut refresh_failed: Vec<(String, String)> = Vec::new();
 
         for server in servers {
           tasks.push_back(async move {
@@ -123,7 +125,7 @@ impl AsahiCoordinator for PollServers {
           match result {
             Ok(data) => {
               SERVERS_CACHE.insert(server.internal.clone(), data.clone());
-              info!("Cache refreshed for {}", server.friendly);
+              refreshed.push(server.friendly);
 
               let players = data
                 .dss
@@ -152,8 +154,17 @@ impl AsahiCoordinator for PollServers {
                 }
               }
             },
-            Err(e) => error!("Failed to cache data for {}: {e}", server.friendly)
+            Err(e) => refresh_failed.push((server.friendly, e.to_string())) //error!("Failed to cache data for {}: {e}", server.friendly)
           }
+        }
+
+        if !refreshed.is_empty() {
+          info!("Cache refreshed for {}", refreshed.join(", "));
+        }
+
+        if !refresh_failed.is_empty() {
+          let servers: Vec<String> = refresh_failed.iter().map(|(srv, e)| format!("{srv} ({e})",)).collect();
+          error!("Failed to cache data for following servers: {}", servers.join(", "));
         }
       },
       Err(e) => error!("Error fetching servers: {e}")
