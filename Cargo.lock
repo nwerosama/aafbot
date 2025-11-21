@@ -86,8 +86,8 @@ dependencies = [
 
 [[package]]
 name = "asahi"
-version = "0.1.10"
-source = "git+https://git.playground.red/nwerosama/asahi?branch=master#a927b430fedfb995eaf346b1649ef5d9eed15350"
+version = "0.1.11"
+source = "git+https://git.playground.red/nwerosama/asahi?branch=master#4e1dc057fa0a991c015848f2b9b52bcc918ef00a"
 dependencies = [
  "asahi_coordinator",
  "asahi_internal",
@@ -96,8 +96,8 @@ dependencies = [
 
 [[package]]
 name = "asahi_coordinator"
-version = "0.1.10"
-source = "git+https://git.playground.red/nwerosama/asahi?branch=master#a927b430fedfb995eaf346b1649ef5d9eed15350"
+version = "0.1.11"
+source = "git+https://git.playground.red/nwerosama/asahi?branch=master#4e1dc057fa0a991c015848f2b9b52bcc918ef00a"
 dependencies = [
  "asahi_internal",
  "async-trait",
@@ -106,8 +106,8 @@ dependencies = [
 
 [[package]]
 name = "asahi_internal"
-version = "0.1.10"
-source = "git+https://git.playground.red/nwerosama/asahi?branch=master#a927b430fedfb995eaf346b1649ef5d9eed15350"
+version = "0.1.11"
+source = "git+https://git.playground.red/nwerosama/asahi?branch=master#4e1dc057fa0a991c015848f2b9b52bcc918ef00a"
 dependencies = [
  "bb8-redis",
  "hyper",
@@ -125,8 +125,8 @@ dependencies = [
 
 [[package]]
 name = "asahi_utils"
-version = "0.1.10"
-source = "git+https://git.playground.red/nwerosama/asahi?branch=master#a927b430fedfb995eaf346b1649ef5d9eed15350"
+version = "0.1.11"
+source = "git+https://git.playground.red/nwerosama/asahi?branch=master#4e1dc057fa0a991c015848f2b9b52bcc918ef00a"
 dependencies = [
  "asahi_internal",
  "lazy_static",

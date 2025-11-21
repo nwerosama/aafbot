@@ -21,7 +21,7 @@ spec:
           image: ghcr.io/nwerosama/aafbot:sanke
           imagePullPolicy: Always
           env:
-            - name: DOCKER_HOSTNAME
+            - name: NODE_HOSTNAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName

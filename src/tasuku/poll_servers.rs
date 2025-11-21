@@ -154,7 +154,7 @@ impl AsahiCoordinator for PollServers {
                 }
               }
             },
-            Err(e) => refresh_failed.push((server.friendly, e.to_string())) //error!("Failed to cache data for {}: {e}", server.friendly)
+            Err(e) => refresh_failed.push((server.friendly, e.to_string()))
           }
         }
 

@@ -5,6 +5,7 @@ use {
       format_bytes,
       format_duration,
       os::{
+        get_hostname,
         get_memory,
         get_os_info,
         get_uptime
@@ -22,15 +23,10 @@ use {
 pub async fn botstats(ctx: super::PoiseContext<'_>) -> AsahiResult {
   let bot_name = ctx.cache().current_user().name.clone();
 
-  let node_hostname = match std::env::var("DOCKER_HOSTNAME") {
-    Ok(h) => h.to_string(),
-    Err(_) => String::from("HOSTNAME_NOT_SET")
-  };
-
   let (sys_up, sys_mem, proc_up, proc_mem) = (get_uptime().system, get_memory().system, get_uptime().process, get_memory().process);
 
   let node_stats = [
-    format!("**Hostname:** `{node_hostname}`"),
+    format!("**Hostname:** `{}`", get_hostname()),
     format!("**OS:** `{}`", get_os_info()),
     format!(
       "**Uptime:**\n- **Host:** `{}`\n- **Bot:** `{}`",

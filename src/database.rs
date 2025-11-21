@@ -4,7 +4,6 @@ use {
     info,
     utils::database::{
       AsahiDatabaseConfig,
-      AsahiDatabaseKind,
       connect
     }
   },
@@ -21,8 +20,6 @@ impl AsahiDatabaseConfig for Database {
   fn uri(&self) -> &str { &self.0 }
 
   fn app_name(&self) -> &str { "AAFBot" }
-
-  fn kind(&self) -> AsahiDatabaseKind { AsahiDatabaseKind::Postgres }
 
   fn max_connections(&self) -> u32 { 10 }
 }
