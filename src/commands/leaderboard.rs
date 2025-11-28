@@ -83,9 +83,9 @@ async fn search(
   #[description = "In-game name to search for, e.g Nwero"] player_name: String
 ) -> AsahiResult {
   let database = ctx.data().database.clone();
-  let name = player_name.trim().to_lowercase();
+  let name = player_name.trim();
 
-  let entry = sqlx::query_as!(Player, "SELECT name, total_played FROM players WHERE LOWER(name) = $1", name)
+  let entry = sqlx::query_as!(Player, "SELECT name, total_played FROM players WHERE name = $1", name)
     .fetch_optional(&database)
     .await?;
 
@@ -109,7 +109,7 @@ async fn search(
       .await
       .unwrap();
   } else {
-    let suggested = sqlx::query!("SELECT name FROM players WHERE LOWER(name) LIKE $1 LIMIT 10", format!("%{name}%"))
+    let suggested = sqlx::query!("SELECT name FROM players WHERE name LIKE $1 LIMIT 10", format!("%{name}%"))
       .fetch_all(&database)
       .await?;
 
