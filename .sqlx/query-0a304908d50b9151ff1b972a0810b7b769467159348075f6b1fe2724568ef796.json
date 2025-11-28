@@ -1,17 +1,12 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT name, total_played FROM players WHERE LOWER(name) = $1",
+  "query": "SELECT name FROM players WHERE name LIKE $1 LIMIT 10",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
         "name": "name",
         "type_info": "Varchar"
-      },
-      {
-        "ordinal": 1,
-        "name": "total_played",
-        "type_info": "Int4"
       }
     ],
     "parameters": {
@@ -20,9 +15,8 @@
       ]
     },
     "nullable": [
-      false,
       false
     ]
   },
-  "hash": "41335e0cbbada815bfb027e0a67417d6c921d434b0b75ead29fbfd9b896bb420"
+  "hash": "0a304908d50b9151ff1b972a0810b7b769467159348075f6b1fe2724568ef796"
 }
