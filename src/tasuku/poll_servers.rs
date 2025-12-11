@@ -51,10 +51,11 @@ async fn fetch_data(server: Server) -> AsahiResult<Data> {
 /// Stores the player's session time into database
 async fn store_session_entry(
   db: &sqlx::PgPool,
+  server: &str,
   name: &str,
   uptime: i32
 ) -> AsahiResult<i32> {
-  let kv_key = format!("player_last_uptime:{name}");
+  let kv_key = format!("player_last_uptime:{server}:{name}");
 
   let last_uptime: Option<i32> = sqlx::query_scalar!("SELECT value FROM kv WHERE key = $1", kv_key)
     .fetch_optional(db)
@@ -144,9 +145,13 @@ impl AsahiCoordinator for PollServers {
                     continue;
                   }
 
-                  match store_session_entry(db, &pname, puptime).await {
+                  let sname = &server.internal;
+
+                  match store_session_entry(db, sname, &pname, puptime).await {
                     #[cfg(not(feature = "production"))]
-                    Ok(total) => asahi::debug!("Session entry for {pname} has been inserted into database, total session is {total} minutes"),
+                    Ok(total) => {
+                      asahi::debug!("Session entry for {pname} ({sname}) has been inserted into database, total session is {total} minutes")
+                    },
                     #[cfg(feature = "production")]
                     Ok(_) => (),
                     Err(e) => error!("Failed to store session entry for {pname}: {e}")
