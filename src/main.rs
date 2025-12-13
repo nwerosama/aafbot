@@ -109,10 +109,10 @@ async fn main() {
     Token::from_env("DISCORD_TOKEN").expect("No 'DISCORD_TOKEN' found!"),
     GatewayIntents::GUILDS | GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT
   )
-  .event_handler(DiscordEvents {
+  .event_handler(Arc::new(DiscordEvents {
     probe: Arc::clone(&health_probe)
-  })
-  .framework(framework)
+  }))
+  .framework(Box::new(framework))
   .data(bot_data)
   .status(OnlineStatus::Online)
   .activity(ActivityData::custom("Koi fishes are very nice!"))
