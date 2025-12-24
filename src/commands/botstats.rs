@@ -22,6 +22,7 @@ use {
 #[poise::command(slash_command, install_context = "Guild", interaction_context = "Guild")]
 pub async fn botstats(ctx: super::PoiseContext<'_>) -> AsahiResult {
   let bot_name = ctx.cache().current_user().name.clone();
+  let bot_ver = env!("CARGO_PKG_VERSION");
 
   let (sys_up, sys_mem, proc_up, proc_mem) = (get_uptime().system, get_memory().system, get_uptime().process, get_memory().process);
 
@@ -44,7 +45,7 @@ pub async fn botstats(ctx: super::PoiseContext<'_>) -> AsahiResult {
 
   let embed = CreateEmbed::new()
     .color(ctx.data().embed_color)
-    .title(format!("{bot_name} - Statistics"))
+    .title(format!("{bot_name} {bot_ver} - Statistics"))
     .fields([("Node stats", node_stats, true)]);
 
   ctx.send(CreateReply::default().embed(embed)).await.unwrap();
