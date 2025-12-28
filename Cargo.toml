@@ -1,6 +1,6 @@
 [package]
 name = "aafbot"
-version = "0.1.9"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
@@ -14,7 +14,7 @@ hyper = "1.8.1"
 lazy_static = "1.5.0"
 pin-project-lite = "0.2.16"
 poise = { git = "https://github.com/serenity-rs/poise", branch = "serenity-next" }
-serde_json = "1.0.147"
+serde_json = "1.0.148"
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "postgres"] }
 tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros", "signal"] }
 

@@ -68,17 +68,15 @@ async fn timestamp(
   #[description = "Unix epoch timestamp"] timestamp: u64
 ) -> AsahiResult {
   sqlx::query!(
-    "INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-    "lb_data_collection_date",
-    timestamp.to_string()
+    "INSERT INTO leaderboard_conf (start_date) VALUES ($1)
+    ON CONFLICT (start_date) DO UPDATE SET start_date = EXCLUDED.start_date",
+    timestamp as i64
   )
   .execute(&ctx.data().database)
   .await?;
 
   ctx
-    .say(format!(
-      "Successfully set <t:{timestamp}:D> as the leaderboard's data collection start date!"
-    ))
+    .say(format!("Successfully set <t:{timestamp}:D> as the leaderboard's start date!"))
     .await
     .unwrap();
 

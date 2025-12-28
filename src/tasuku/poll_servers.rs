@@ -51,16 +51,14 @@ async fn fetch_data(server: Server) -> AsahiResult<Data> {
 /// Stores the player's session time into database
 async fn store_session_entry(
   db: &sqlx::PgPool,
-  server: &str,
+  server: &Server,
   name: &str,
   uptime: i32
-) -> AsahiResult<i32> {
-  let kv_key = format!("player_last_uptime:{server}:{name}");
-
-  let last_uptime: Option<i32> = sqlx::query_scalar!("SELECT value FROM kv WHERE key = $1", kv_key)
+) -> AsahiResult<Option<i32>> {
+  let last_uptime: Option<i32> = sqlx::query_scalar!("SELECT playtime FROM sessions WHERE name = $1 AND server = $2", name, server.internal)
     .fetch_optional(db)
     .await?
-    .and_then(|s| s.parse().ok());
+    .and_then(|p| p);
 
   let delta = match last_uptime {
     Some(prev) => (uptime - prev).max(0),
@@ -68,33 +66,33 @@ async fn store_session_entry(
   };
 
   sqlx::query!(
-    "INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-    kv_key,
-    uptime.to_string()
+    "INSERT INTO sessions (name, server, playtime) VALUES ($1, $2, $3)
+    ON CONFLICT (name, server) DO UPDATE SET playtime = EXCLUDED.playtime",
+    name,
+    server.internal,
+    uptime
   )
   .execute(db)
   .await?;
 
   if delta == 0 {
-    let result = sqlx::query_scalar!("SELECT total_played FROM players WHERE name = $1", name)
-      .fetch_optional(db)
-      .await?
-      .unwrap_or(0);
-
-    return Ok(result);
+    return Ok(None);
   }
 
   let result = sqlx::query_scalar!(
-    "INSERT INTO players (name, total_played) VALUES ($1, $2) ON CONFLICT (name)
-    DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played
-    RETURNING total_played",
+    "INSERT INTO players (name, total_played, last_seen_server, last_seen_date)
+    VALUES ($1, $2, $3, EXTRACT(EPOCH FROM NOW())::INT) ON CONFLICT (name) DO UPDATE
+      SET total_played = players.total_played + EXCLUDED.total_played,
+        last_seen_server = EXCLUDED.last_seen_server, last_seen_date = EXCLUDED.last_seen_date
+     RETURNING total_played",
     name,
-    delta
+    delta,
+    server.friendly
   )
   .fetch_one(db)
   .await?;
 
-  Ok(result)
+  Ok(Some(result))
 }
 
 #[asahi::async_trait]
@@ -126,7 +124,7 @@ impl AsahiCoordinator for PollServers {
           match result {
             Ok(data) => {
               SERVERS_CACHE.insert(server.internal.clone(), data.clone());
-              refreshed.push(server.friendly);
+              refreshed.push(server.clone().friendly);
 
               let players = data
                 .dss
@@ -145,12 +143,13 @@ impl AsahiCoordinator for PollServers {
                     continue;
                   }
 
-                  let sname = &server.internal;
-
-                  match store_session_entry(db, sname, &pname, puptime).await {
+                  match store_session_entry(db, &server, &pname, puptime).await {
                     #[cfg(not(feature = "production"))]
                     Ok(total) => {
-                      asahi::debug!("Session entry for {pname} ({sname}) has been inserted into database, total session is {total} minutes")
+                      let sname = &server.internal;
+                      if let Some(total) = total {
+                        asahi::debug!("Session entry for {pname} ({sname}) has been inserted into database, total session is {total} minutes");
+                      }
                     },
                     #[cfg(feature = "production")]
                     Ok(_) => (),
