@@ -49,7 +49,12 @@ async fn handshake(url: Uri) -> AsahiResult<http1::SendRequest<Empty<Bytes>>> {
   let connect_timeout = Duration::from_secs(15);
   let stream = match timeout(connect_timeout, TcpStream::connect(format!("{host}:{port}"))).await {
     Ok(Ok(s)) => s,
-    Ok(Err(e)) => return Err(AsahiError::Network(format!("Connection error: {e}").into())),
+    Ok(Err(e)) => {
+      if e.kind() == std::io::ErrorKind::ConnectionReset {
+        return Err(AsahiError::Network(Cow::Borrowed("Connection reset by peer")))
+      }
+      return Err(AsahiError::Network(format!("Connection error: {e}").into()))
+    },
     Err(_) => return Err(AsahiError::Network(Cow::Borrowed("Connection timed out")))
   };
   let io = TokioIo::new(stream);
