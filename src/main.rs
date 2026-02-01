@@ -39,6 +39,7 @@ use {
 
 #[tokio::main]
 async fn main() {
+  asahi::utils::install_crypto_provider();
   asahi::log_init();
 
   let health_probe = Arc::new(asahi::Probe::new());
@@ -115,7 +116,7 @@ async fn main() {
   .framework(Box::new(framework))
   .data(bot_data)
   .status(OnlineStatus::Online)
-  .activity(ActivityData::custom("Koi fishes are very nice!"))
+  .activity(ActivityData::custom("I love Taisho Sanke koi fish!"))
   .await
   .expect("Error creating Serenity client");
 
