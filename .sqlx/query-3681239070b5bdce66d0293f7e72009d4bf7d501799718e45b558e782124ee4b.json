@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO players (name, total_played, last_seen_server, last_seen_date)\n    VALUES ($1, $2, $3, EXTRACT(EPOCH FROM NOW())::INT) ON CONFLICT (name) DO UPDATE\n      SET total_played = players.total_played + EXCLUDED.total_played,\n        last_seen_server = EXCLUDED.last_seen_server, last_seen_date = EXCLUDED.last_seen_date\n     RETURNING total_played",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_played",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3681239070b5bdce66d0293f7e72009d4bf7d501799718e45b558e782124ee4b"
+}

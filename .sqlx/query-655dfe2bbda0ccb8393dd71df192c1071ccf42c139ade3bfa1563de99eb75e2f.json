@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name, total_played, last_seen_server, last_seen_date FROM players WHERE name = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "total_played",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "last_seen_server",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_seen_date",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "655dfe2bbda0ccb8393dd71df192c1071ccf42c139ade3bfa1563de99eb75e2f"
+}

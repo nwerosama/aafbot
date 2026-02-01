@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO sessions (name, server, playtime) VALUES ($1, $2, $3)\n    ON CONFLICT (name, server) DO UPDATE SET playtime = EXCLUDED.playtime",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "032148605fff00b8a950d02acb7a9ad3fe9f54612fdb1df83f716b5c927ab399"
+}

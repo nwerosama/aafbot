@@ -1,22 +1,23 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT total_played FROM players WHERE name = $1",
+  "query": "SELECT playtime FROM sessions WHERE name = $1 AND server = $2",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "total_played",
+        "name": "playtime",
         "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
+        "Text",
         "Text"
       ]
     },
     "nullable": [
-      false
+      true
     ]
   },
-  "hash": "3a62ed77ea9b677b01dfe18bb7d817d345a6bca80beaf9014e20cfef26539f8b"
+  "hash": "23f2991d84108ab8432e50991afbde21beb292473b97c8b127186f57efb3e7d7"
 }
