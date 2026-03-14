@@ -3,9 +3,11 @@ mod ready;
 
 use {
   asahi::Probe,
+  extract_map::ExtractMap,
   poise::serenity_prelude::{
     ConnectionStage,
     Context,
+    Event,
     EventHandler,
     FullEvent,
     async_trait
@@ -35,5 +37,35 @@ impl EventHandler for DiscordEvents {
       FullEvent::Message { new_message, .. } => message::on_message(ctx, new_message).await.unwrap(),
       _ => ()
     }
+  }
+
+  fn filter_event(
+    &self,
+    _ctx: &Context,
+    mut event: Box<Event>
+  ) -> Option<Box<Event>> {
+    // drop undocumented event
+    if event.name() == "GUILD_JOIN_REQUEST_UPDATE" {
+      return None
+    }
+
+    // filter unimportant events out as i do not do anything with it to reduce memory footprint as much as possible.
+    match &mut *event {
+      Event::MessageCreate(_) => return None,
+      Event::MessageUpdate(_) => return None,
+      Event::GuildCreate(evt) => {
+        evt.guild.emojis = ExtractMap::new();
+        evt.guild.stickers = ExtractMap::new();
+      },
+      Event::GuildUpdate(evt) => {
+        evt.guild.emojis = ExtractMap::new();
+        evt.guild.stickers = ExtractMap::new();
+      },
+      Event::GuildEmojisUpdate(evt) => evt.emojis = ExtractMap::new(),
+      Event::GuildStickersUpdate(evt) => evt.stickers = ExtractMap::new(),
+      _ => ()
+    }
+
+    Some(event)
   }
 }
