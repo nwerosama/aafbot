@@ -2,7 +2,7 @@ FROM scratch AS base
 WORKDIR /builder
 COPY . .
 
-FROM archlinux:base@sha256:4585b6322b40a28877dbe2363c7281dd046d9289300a36f58edc207ed1c8db90
+FROM archlinux:base@sha256:b55ff128e357ad0ce5e0438e2d7bf9b51fb2ce5bdf424109da14ee01c996d571
 LABEL org.opencontainers.image.source="https://github.com/nwerosama/aafbot"
 ENV RUST_LOG=debug
 RUN pacman-key --init
