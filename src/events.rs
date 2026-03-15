@@ -44,14 +44,8 @@ impl EventHandler for DiscordEvents {
     _ctx: &Context,
     mut event: Box<Event>
   ) -> Option<Box<Event>> {
-    // drop undocumented event
-    if event.name() == "GUILD_JOIN_REQUEST_UPDATE" {
-      return None
-    }
-
     // filter unimportant events out as i do not do anything with it to reduce memory footprint as much as possible.
     match &mut *event {
-      Event::MessageCreate(_) => return None,
       Event::MessageUpdate(_) => return None,
       Event::GuildCreate(evt) => {
         evt.guild.emojis = ExtractMap::new();
