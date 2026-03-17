@@ -13,7 +13,10 @@ use {
     info,
     utils::database::prepare_tables
   },
-  data::BotData,
+  data::{
+    BotData,
+    Emojis
+  },
   events::DiscordEvents,
   poise::{
     Framework,
@@ -54,7 +57,11 @@ async fn main() {
     },
     notify_dev:  UserId::new(190407856527376384),
     database:    database::init().await,
-    site_url:    var("AAF_SITE").expect("No 'AAF_SITE' key found!")
+    site_url:    var("AAF_SITE").expect("No 'AAF_SITE' key found!"),
+    emojis:      Emojis {
+      fs22: 1483331116227104851,
+      fs25: 1483331150104756266
+    }
   });
 
   if let Err(e) = prepare_tables(&bot_data.database, "schemas").await {
@@ -90,7 +97,6 @@ async fn main() {
         })
       },
       prefix_options: PrefixFrameworkOptions {
-        prefix: Some(Cow::Borrowed(">")),
         mention_as_prefix: true,
         case_insensitive_commands: true,
         execute_self_messages: false,

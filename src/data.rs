@@ -6,5 +6,12 @@ pub struct BotData {
   pub notify_dev:  poise::serenity_prelude::UserId,
   pub database:    sqlx::PgPool,
   /// Base url of the community site
-  pub site_url:    String
+  pub site_url:    String,
+  pub emojis:      Emojis
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Emojis {
+  pub fs22: u64,
+  pub fs25: u64
 }

@@ -1,21 +1,39 @@
 use {
+  crate::events::planting_info_message,
   asahi::AsahiResult,
   poise::{
+    ChoiceParameter,
     CreateReply,
     serenity_prelude::{
       CreateAllowedMentions,
       GenericChannelId,
       builder::CreateMessage
     }
-  }
+  },
+  std::env::var
 };
+
+#[derive(ChoiceParameter)]
+enum InfoChannel {
+  Planting
+}
+
+impl InfoChannel {
+  fn id(self) -> GenericChannelId {
+    let id = match self {
+      Self::Planting => var("AAF_PLANTING_INFO").expect("No 'AAF_PLANTING_INFO' key found")
+    };
+
+    GenericChannelId::new(id.parse::<u64>().unwrap())
+  }
+}
 
 /// Developer commands to interact the bot with
 #[poise::command(
   slash_command,
   owners_only,
   default_member_permissions = "ADMINISTRATOR",
-  subcommands("echo", "leaderboard")
+  subcommands("echo", "leaderboard", "ship_info")
 )]
 pub async fn dev(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
@@ -53,6 +71,25 @@ async fn echo(
       return Ok(());
     }
   }
+
+  Ok(())
+}
+
+/// Ship an info message to specified channel, f.e. planting info
+#[poise::command(slash_command)]
+async fn ship_info(
+  ctx: super::PoiseContext<'_>,
+  #[description = "Info channel to ship this to"] channel: InfoChannel
+) -> AsahiResult {
+  ctx.defer_ephemeral().await.unwrap();
+
+  let channel_id = channel.id();
+
+  match channel {
+    InfoChannel::Planting => planting_info_message(ctx.serenity_context(), channel_id).await
+  }
+
+  ctx.reply(format!("Shipped it to <#{}>", channel_id.get())).await.unwrap();
 
   Ok(())
 }

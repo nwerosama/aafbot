@@ -1,5 +1,10 @@
+mod interaction;
 mod message;
 mod ready;
+
+// todo; move planting_info_message func to suitable place
+// in the future if we add more info channels to this bot
+pub use interaction::planting_info_message;
 
 use {
   asahi::Probe,
@@ -34,6 +39,7 @@ impl EventHandler for DiscordEvents {
         ConnectionStage::Disconnected => self.probe.update_status(false).await,
         _ => ()
       },
+      FullEvent::InteractionCreate { interaction, .. } => interaction::on_interaction(ctx, interaction).await.unwrap(),
       FullEvent::Message { new_message, .. } => message::on_message(ctx, new_message).await.unwrap(),
       _ => ()
     }
