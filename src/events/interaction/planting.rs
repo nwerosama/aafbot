@@ -119,13 +119,13 @@ pub async fn planting_guide(
   let data = match server {
     "grain22" => EmbedData {
       title:     "Grain 22",
-      image_url: "https://cdn.discordapp.com/attachments/1291076787559989288/1471844013148475435/Grain_22_Planting_Guide.png",
-      unix_ts:   1772269700
+      image_url: "https://cdn.discordapp.com/attachments/1291078602485534740/1488246019001942147/IMG_5765.png",
+      unix_ts:   1774895880
     },
     "animals22" => EmbedData {
       title:     "Animals 22",
-      image_url: "https://cdn.discordapp.com/attachments/1291076787559989288/1471844012125323458/Animals_22_Planting_Guide.png",
-      unix_ts:   1772269700
+      image_url: "https://cdn.discordapp.com/attachments/1291078602485534740/1488246018507018531/IMG_5776.png",
+      unix_ts:   1774895880
     },
     "grain25" => EmbedData {
       title:     "Grain 25",
