@@ -26,8 +26,6 @@ pub async fn on_interaction(
   if let Interaction::Component(cmpt) = interaction {
     let id = cmpt.data.custom_id.as_str();
 
-    debug!("received request for {id}");
-
     match id {
       "planting-main" => {
         if let ComponentInteractionDataKind::StringSelect { values } = &cmpt.data.kind

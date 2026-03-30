@@ -90,6 +90,7 @@ pub async fn planting_info_message(
       "equipment-main",
       CreateSelectMenuKind::String {
         options: vec![
+          CreateSelectMenuOption::new("Select this to view again", "equipment-noop").default_selection(true),
           // comment out the ones that we do not have images for
           // CreateSelectMenuOption::new("Grain 22", "equipment-grain22").emoji(fs22.clone()),
           // CreateSelectMenuOption::new("Animals 22", "equipment-animals22").emoji(fs22),
@@ -163,6 +164,15 @@ pub async fn equipment_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
+  if server == "noop" {
+    interaction
+      .create_response(&ctx.http, CreateInteractionResponse::Acknowledge)
+      .await
+      .unwrap();
+
+    return Ok(())
+  }
+
   let data = match server {
     "grain22" => MediaData {
       title:   "Grain 22",
