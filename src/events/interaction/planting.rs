@@ -119,7 +119,7 @@ pub async fn planting_guide(
   let data = match server {
     "grain22" => EmbedData {
       title:     "Grain 22",
-      image_url: "https://cdn.discordapp.com/attachments/1291078602485534740/1488246019001942147/IMG_5765.png",
+      image_url: "https://assets.aaf.farm/files/planting/grain22/planting-guide.png",
       unix_ts:   1774895880
     },
     "animals22" => EmbedData {
@@ -148,7 +148,7 @@ pub async fn planting_guide(
           CreateEmbed::default()
             .color(ctx.data::<BotData>().embed_color)
             .title(data.title)
-            .image(data.image_url)
+            .image(format!("{}?v={}", data.image_url, data.unix_ts))
             .timestamp(Timestamp::from_unix_timestamp(data.unix_ts).expect("Time went on an adventure"))
         )
       )
