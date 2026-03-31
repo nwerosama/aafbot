@@ -7,6 +7,7 @@ use {
     serenity_prelude::{
       CreateAllowedMentions,
       GenericChannelId,
+      MessageId,
       builder::CreateMessage
     }
   },
@@ -79,17 +80,24 @@ async fn echo(
 #[poise::command(slash_command)]
 async fn ship_info(
   ctx: super::PoiseContext<'_>,
-  #[description = "Info channel to ship this to"] channel: InfoChannel
+  #[description = "Info channel to ship this to"] channel: InfoChannel,
+  #[description = "Edit existing message to update info with"] message_id: Option<String>
 ) -> AsahiResult {
   ctx.defer_ephemeral().await.unwrap();
 
   let channel_id = channel.id();
 
+  let message_id = message_id.map(|i| MessageId::new(i.parse::<u64>().expect("not a valid snowflake")));
+
   match channel {
-    InfoChannel::Planting => planting_info_message(ctx.serenity_context(), channel_id).await
+    InfoChannel::Planting => planting_info_message(ctx.serenity_context(), channel_id, message_id).await
   }
 
-  ctx.reply(format!("Shipped it to <#{}>", channel_id.get())).await.unwrap();
+  if message_id.is_some() {
+    ctx.reply(format!("Updated the message in <#{}>", channel_id.get())).await.unwrap();
+  } else {
+    ctx.reply(format!("Shipped it to <#{}>", channel_id.get())).await.unwrap();
+  }
 
   Ok(())
 }

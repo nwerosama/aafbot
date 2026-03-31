@@ -20,9 +20,11 @@ use {
     CreateSeparator,
     CreateTextDisplay,
     CreateUnfurledMediaItem,
+    EditMessage,
     EmojiId,
     GenericChannelId,
     MessageFlags,
+    MessageId,
     ReactionType,
     Timestamp,
     builder::CreateMessage,
@@ -34,21 +36,54 @@ use {
 /// Structure for Planting guide embeds
 struct EmbedData {
   title:     &'static str,
-  image_url: &'static str,
+  image_url: String,
   unix_ts:   i64
 }
 
 /// Structure for Equipment guide images
 struct MediaData {
   title:   &'static str,
-  media:   Vec<&'static str>,
+  media:   Vec<String>,
   unix_ts: i64
 }
 
-pub async fn planting_info_message(
-  ctx: &Context,
-  channel_id: GenericChannelId
-) {
+#[non_exhaustive]
+enum GuideKind {
+  Planting,
+  Equipment
+}
+
+impl std::fmt::Display for GuideKind {
+  fn fmt(
+    &self,
+    f: &mut std::fmt::Formatter<'_>
+  ) -> std::fmt::Result {
+    let k = match self {
+      Self::Planting => "planting",
+      Self::Equipment => "equipment"
+    };
+    write!(f, "{k}")
+  }
+}
+
+/// Fetches Unix epoch from `timestamp.txt` on asset server
+async fn fetch_unix_epoch(
+  url: &str,
+  guide_kind: GuideKind,
+  server: &str
+) -> i64 {
+  reqwest::get(format!("{url}/files/{guide_kind}/{server}/timestamp.txt"))
+    .await
+    .expect("error fetching timestamp value")
+    .text()
+    .await
+    .unwrap()
+    .trim()
+    .parse::<i64>()
+    .unwrap_or(0)
+}
+
+fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
   let fs22 = ReactionType::Custom {
     id:       EmojiId::new(ctx.data::<BotData>().emojis.fs22),
     animated: false,
@@ -62,7 +97,7 @@ pub async fn planting_info_message(
 
   let handbook_url = var("AAF_PLANTING_HANDBOOK").expect("No 'AAF_PLANTING_HANDBOOK' key found");
 
-  let cv2 = CreateComponent::Container(CreateContainer::new(vec![
+  CreateComponent::Container(CreateContainer::new(vec![
     CreateContainerComponent::ActionRow(CreateActionRow::Buttons(
       vec![
         CreateButton::new_link(handbook_url)
@@ -90,25 +125,45 @@ pub async fn planting_info_message(
       "equipment-main",
       CreateSelectMenuKind::String {
         options: vec![
-          CreateSelectMenuOption::new("Select this to view again", "equipment-noop").default_selection(true),
           // comment out the ones that we do not have images for
           // CreateSelectMenuOption::new("Grain 22", "equipment-grain22").emoji(fs22.clone()),
           // CreateSelectMenuOption::new("Animals 22", "equipment-animals22").emoji(fs22),
           CreateSelectMenuOption::new("Grain 25", "equipment-grain25").emoji(fs25.clone()),
-          // CreateSelectMenuOption::new("Animals 25", "equipment-animals25").emoji(fs25),
+          CreateSelectMenuOption::new("Animals 25", "equipment-animals25").emoji(fs25),
         ]
         .into()
       }
     ))),
-  ]));
+  ]))
+}
 
-  channel_id
-    .send_message(
-      &ctx.http,
-      CreateMessage::default().components(vec![cv2]).flags(MessageFlags::IS_COMPONENTS_V2)
-    )
-    .await
-    .unwrap();
+pub async fn planting_info_message(
+  ctx: &Context,
+  channel_id: GenericChannelId,
+  message_id: Option<MessageId>
+) {
+  if let Some(msg_id) = message_id {
+    channel_id
+      .edit_message(
+        &ctx.http,
+        msg_id,
+        EditMessage::default()
+          .components(vec![planting_components(ctx)])
+          .flags(MessageFlags::IS_COMPONENTS_V2)
+      )
+      .await
+      .expect("discord threw an error");
+  } else {
+    channel_id
+      .send_message(
+        &ctx.http,
+        CreateMessage::default()
+          .components(vec![planting_components(ctx)])
+          .flags(MessageFlags::IS_COMPONENTS_V2)
+      )
+      .await
+      .expect("discord threw an error");
+  }
 }
 
 pub async fn planting_guide(
@@ -116,26 +171,30 @@ pub async fn planting_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
+  let base_url = var("AAF_ASSETS").expect("No 'AAF_ASSETS' key found");
+  let image_url = format!("{base_url}/files/planting/{server}/planting-guide.png");
+  let unix_ts = fetch_unix_epoch(&base_url, GuideKind::Planting, server).await;
+
   let data = match server {
     "grain22" => EmbedData {
-      title:     "Grain 22",
-      image_url: "https://assets.aaf.farm/files/planting/grain22/planting-guide.png",
-      unix_ts:   1774895880
+      title: "Grain 22",
+      image_url,
+      unix_ts
     },
     "animals22" => EmbedData {
-      title:     "Animals 22",
-      image_url: "https://cdn.discordapp.com/attachments/1291078602485534740/1488246018507018531/IMG_5776.png",
-      unix_ts:   1774895880
+      title: "Animals 22",
+      image_url,
+      unix_ts
     },
     "grain25" => EmbedData {
-      title:     "Grain 25",
-      image_url: "https://cdn.discordapp.com/attachments/1291076787559989288/1471844013836468254/Grain_25_Planting_Guide.png",
-      unix_ts:   1772269700
+      title: "Grain 25",
+      image_url,
+      unix_ts
     },
     "animals25" => EmbedData {
-      title:     "Animals 25",
-      image_url: "https://cdn.discordapp.com/attachments/1291076787559989288/1471844012641091614/Animals_25_Planting_Guide.png",
-      unix_ts:   1772269700
+      title: "Animals 25",
+      image_url,
+      unix_ts
     },
     _ => return Ok(())
   };
@@ -164,42 +223,43 @@ pub async fn equipment_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
-  if server == "noop" {
-    interaction
-      .create_response(&ctx.http, CreateInteractionResponse::Acknowledge)
-      .await
-      .unwrap();
-
-    return Ok(())
-  }
+  let base_url = var("AAF_ASSETS").expect("No 'AAF_ASSETS' key found");
+  let guide_url = format!("{base_url}/files/equipment/{server}");
+  let unix_ts = fetch_unix_epoch(&base_url, GuideKind::Equipment, server).await;
 
   let data = match server {
     "grain22" => MediaData {
-      title:   "Grain 22",
-      media:   vec![],
-      unix_ts: 1772269700
+      title: "Grain 22",
+      media: vec![],
+      unix_ts
     },
     "animals22" => MediaData {
-      title:   "Animals 22",
-      media:   vec![],
-      unix_ts: 1772269700
+      title: "Animals 22",
+      media: vec![],
+      unix_ts
     },
     "grain25" => MediaData {
-      title:   "Grain 25",
-      media:   vec![
-        "https://cdn.discordapp.com/attachments/1311282815601741844/1477346896522510437/Grain_RiceCrops.png",
-        "https://cdn.discordapp.com/attachments/1311282815601741844/1477346897097392283/Grain_RootCrops.png",
-        "https://cdn.discordapp.com/attachments/1311282815601741844/1477346897596252404/Grain_RootCrops2.png",
-        "https://cdn.discordapp.com/attachments/1311282815601741844/1477346898007556168/Grain_Sugar-1.png",
-        "https://cdn.discordapp.com/attachments/1311282815601741844/1477346896069656597/Grain_Combines.png",
-        "https://cdn.discordapp.com/attachments/1311282815601741844/1477346898670256371/Grain_Trucks.png",
+      title: "Grain 25",
+      media: vec![
+        format!("{guide_url}/Grain_RiceCrops.png"),
+        format!("{guide_url}/Grain_RootCrops.png"),
+        format!("{guide_url}/Grain_RootCrops2.png"),
+        format!("{guide_url}/Grain_Sugar-1.png"),
+        format!("{guide_url}/Grain_Combines.png"),
+        format!("{guide_url}/Grain_Trucks.png"),
       ],
-      unix_ts: 1772269700
+      unix_ts
     },
     "animals25" => MediaData {
-      title:   "Animals 25",
-      media:   vec![],
-      unix_ts: 1772269700
+      title: "Animals 25",
+      media: vec![
+        format!("{guide_url}/Animals_Bailing.png"),
+        format!("{guide_url}/Animals_Cotton.png"),
+        format!("{guide_url}/Animals_Harvest.png"),
+        format!("{guide_url}/Animals_Silage1.png"),
+        format!("{guide_url}/Animals_Silage2.png"),
+      ],
+      unix_ts
     },
     _ => return Ok(())
   };
@@ -212,7 +272,7 @@ pub async fn equipment_guide(
   let items: Vec<CreateMediaGalleryItem> = data
     .media
     .iter()
-    .map(|i| CreateMediaGalleryItem::new(CreateUnfurledMediaItem::new(*i)))
+    .map(|i| CreateMediaGalleryItem::new(CreateUnfurledMediaItem::new(format!("{i}?v={}", data.unix_ts))))
     .collect();
 
   interaction

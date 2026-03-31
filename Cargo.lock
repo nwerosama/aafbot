@@ -17,6 +17,7 @@ dependencies = [
  "lazy_static",
  "pin-project-lite",
  "poise",
+ "reqwest",
  "serde_json",
  "sqlx",
  "tokio",
