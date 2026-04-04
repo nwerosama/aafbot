@@ -53,7 +53,7 @@ async fn main() {
     main_guild:  if cfg!(feature = "production") {
       GuildId::new(1392400099258404976)
     } else {
-      GuildId::new(865673694184996885)
+      GuildId::new(1488321772813291642)
     },
     notify_dev:  UserId::new(190407856527376384),
     database:    database::init().await,
