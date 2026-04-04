@@ -8,7 +8,6 @@ use {
     error,
     info
   },
-  dashmap::DashMap,
   farmsim::{
     DssData,
     EndpointBuilder
@@ -17,13 +16,8 @@ use {
     StreamExt,
     stream::FuturesOrdered
   },
-  http::fetch_dss,
-  lazy_static::lazy_static
+  http::fetch_dss
 };
-
-lazy_static! {
-  static ref SERVERS_CACHE: DashMap<String, Data> = DashMap::new();
-}
 
 pub struct PollServers {
   pub db: sqlx::PgPool
@@ -123,7 +117,6 @@ impl AsahiCoordinator for PollServers {
         while let Some((server, result)) = tasks.next().await {
           match result {
             Ok(data) => {
-              SERVERS_CACHE.insert(server.internal.clone(), data.clone());
               refreshed.push(server.clone().friendly);
 
               let players = data
@@ -163,12 +156,12 @@ impl AsahiCoordinator for PollServers {
         }
 
         if !refreshed.is_empty() {
-          info!("Cache refreshed for {}", refreshed.join(", "));
+          info!("Refreshed data for {}", refreshed.join(", "));
         }
 
         if !refresh_failed.is_empty() {
           let servers: Vec<String> = refresh_failed.iter().map(|(srv, e)| format!("{srv} ({e})",)).collect();
-          error!("Failed to cache data for following servers: {}", servers.join(", "));
+          error!("Failed to refresh data for following servers: {}", servers.join(", "));
         }
       },
       Err(e) => error!("Error fetching servers: {e}")
