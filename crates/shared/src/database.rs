@@ -1,3 +1,5 @@
+pub mod models;
+
 use {
   asahi::{
     error,
@@ -14,18 +16,19 @@ use {
   std::env::var
 };
 
-pub struct Database(String);
+pub struct Database(String, String);
 
 impl AsahiDatabaseConfig for Database {
   fn uri(&self) -> &str { &self.0 }
 
-  fn app_name(&self) -> &str { "AAFBot" }
+  fn app_name(&self) -> &str { &self.1 }
 
   fn max_connections(&self) -> u32 { 10 }
 }
 
-pub async fn init() -> Pool<Postgres> {
-  let conf = Database(var("DATABASE_URL").expect("No 'DATABASE_URL' found!"));
+pub async fn init(name: &str) -> Pool<Postgres> {
+  let uri = var("DATABASE_URL").expect("No 'DATABASE_URL' found!");
+  let conf = Database(uri, name.to_owned());
 
   let pool = connect(&conf).await;
 

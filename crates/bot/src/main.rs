@@ -1,11 +1,8 @@
 mod commands;
 mod data;
-mod database;
 mod errors;
 mod events;
 mod tasuku;
-// https://cdn.toast-server.net/RustFSHiearachy.png
-// Using the new filesystem hierarchy
 
 use {
   asahi::{
@@ -49,14 +46,14 @@ async fn main() {
   health_probe.spawn_server(9100);
 
   let bot_data = Arc::new(BotData {
-    embed_color: if cfg!(feature = "production") { 0x0FD4F2 } else { 0xF1D63C },
+    embed_color: if cfg!(feature = "production") { 0x0FD4F2 } else { 0xD1A0F5 },
     main_guild:  if cfg!(feature = "production") {
       GuildId::new(1392400099258404976)
     } else {
       GuildId::new(1488321772813291642)
     },
     notify_dev:  UserId::new(190407856527376384),
-    database:    database::init().await,
+    database:    aaf_shared::database::init("AAFBot").await,
     site_url:    var("AAF_SITE").expect("No 'AAF_SITE' key found!"),
     emojis:      Emojis {
       fs22: 1483331116227104851,

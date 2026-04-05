@@ -1,5 +1,6 @@
 use {
   crate::events::planting_info_message,
+  aaf_shared::database::models::leaderboard::PlayerLb,
   asahi::AsahiResult,
   poise::{
     ChoiceParameter,
@@ -112,7 +113,8 @@ async fn timestamp(
   ctx: super::PoiseContext<'_>,
   #[description = "Unix epoch timestamp"] timestamp: u64
 ) -> AsahiResult {
-  sqlx::query!(
+  sqlx::query_as!(
+    LeaderboardConfig,
     "INSERT INTO leaderboard_conf (start_date) VALUES ($1)
     ON CONFLICT (start_date) DO UPDATE SET start_date = EXCLUDED.start_date",
     timestamp as i64
@@ -137,7 +139,8 @@ async fn transfer(
 ) -> AsahiResult {
   let mut tx = ctx.data().database.begin().await?;
 
-  let from = sqlx::query!(
+  let from = sqlx::query_as!(
+    PlayerLb,
     "SELECT name, total_played FROM players WHERE LOWER(name) LIKE $1",
     name_a.trim().to_lowercase()
   )
@@ -155,7 +158,8 @@ async fn transfer(
     }
   };
 
-  sqlx::query!(
+  sqlx::query_as!(
+    PlayerLb,
     "INSERT INTO players (name, total_played) VALUES ($1, $2) ON CONFLICT (name)
     DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played",
     name_b,

@@ -1,4 +1,8 @@
 use {
+  aaf_shared::database::models::leaderboard::{
+    LeaderboardConfig,
+    PlayerLb
+  },
   asahi::AsahiResult,
   farmsim::utils::fmt_uptime,
   poise::{
@@ -20,14 +24,6 @@ struct Player {
   last_seen_server: Option<String>,
   /// Unix epoch of where they were last seen on
   last_seen_date:   Option<i64>
-}
-
-#[derive(Debug, Clone)]
-struct PlayerLb {
-  /// FS player name
-  name:         String,
-  /// Session total in minutes
-  total_played: i32
 }
 
 fn slice_list(
@@ -54,7 +50,10 @@ async fn list(ctx: super::PoiseContext<'_>) -> AsahiResult {
     .fetch_all(&db)
     .await?;
 
-  let date = sqlx::query!("SELECT start_date FROM leaderboard_conf").fetch_one(&db).await?.start_date;
+  let date = sqlx::query_as!(LeaderboardConfig, "SELECT start_date FROM leaderboard_conf")
+    .fetch_one(&db)
+    .await?
+    .start_date;
 
   let mid = entries.len().div_ceil(2);
   let (first_half, second_half) = entries.split_at(mid);
