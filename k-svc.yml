@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aaf-serviceaccount
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aaf-clusterrole
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "events"]
+    verbs: ["create", "get", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aaf-clusterrolebinding
+subjects:
+  - kind: ServiceAccount
+    name: aaf-serviceaccount
+    namespace: default
+roleRef:
+    kind: ClusterRole
+    name: aaf-clusterrole
+    apiGroup: rbac.authorization.k8s.io
