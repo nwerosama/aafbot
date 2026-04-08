@@ -20,7 +20,7 @@ sqlx = { workspace = true }
 tokio = { workspace = true }
 
 [[bin]]
-name = "bot"
+name = "aafbot"
 path = "src/main.rs"
 
 [features]

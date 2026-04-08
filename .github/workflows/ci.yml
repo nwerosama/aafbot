@@ -61,7 +61,7 @@ jobs:
       - name: Compile
         run: |
           cargo build --locked -rF production
-          ls -la target
+          ls -lah target target/release
 
       - name: Build and push
         uses: docker/build-push-action@v6

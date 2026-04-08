@@ -5,7 +5,7 @@ RUN pacman-key --init && pacman -Syu --noconfirm && \
   rm -rf /var/cache/pacman/pkg/** && \
   rm -rf /usr/share/{man,doc,info}
 WORKDIR /opt/bot
-COPY target/release/bot .
+COPY target/release/aafbot .
 COPY schemas/ schemas/
 EXPOSE 9100/tcp
-CMD [ "./bot" ]
+CMD [ "./aafbot" ]
