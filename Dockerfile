@@ -6,5 +6,6 @@ RUN pacman-key --init && pacman -Syu --noconfirm && \
   rm -rf /usr/share/{man,doc,info}
 WORKDIR /opt/bot
 COPY target/release/bot .
+COPY schemas/ schemas/
 EXPOSE 9100/tcp
 CMD [ "./bot" ]
