@@ -2,6 +2,7 @@ mod http;
 mod tokiort;
 
 use {
+  aaf_shared::database::models::servers::Server,
   asahi::{
     AsahiCoordinator,
     AsahiResult,
@@ -21,14 +22,6 @@ use {
 
 pub struct PollServers {
   pub db: sqlx::PgPool
-}
-
-#[derive(Debug, Clone)]
-struct Server {
-  friendly: String,
-  internal: String,
-  ip:       String,
-  code:     String
 }
 
 #[derive(Debug, Clone)]
