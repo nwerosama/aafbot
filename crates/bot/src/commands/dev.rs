@@ -1,7 +1,10 @@
 use {
   crate::events::planting_info_message,
   aaf_shared::database::models::leaderboard::PlayerLb,
-  asahi::AsahiResult,
+  asahi::{
+    AsahiResult,
+    warn
+  },
   poise::{
     ChoiceParameter,
     CreateReply,
@@ -30,6 +33,16 @@ impl InfoChannel {
   }
 }
 
+#[derive(poise::Modal)]
+#[name = "Echo your message as a bot"]
+struct EchoModal {
+  #[name = "Message to send"]
+  #[placeholder = "Supports markdown only!"]
+  #[max_length = 2000]
+  #[paragraph]
+  message: String
+}
+
 /// Developer commands to interact the bot with
 #[poise::command(
   slash_command,
@@ -42,12 +55,23 @@ pub async fn dev(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 /// Echo your message as a bot
 #[poise::command(slash_command)]
 async fn echo(
-  ctx: super::PoiseContext<'_>,
-  #[description = "Message to be echoed as a bot"] message: String,
+  ctx: super::PoiseAppCtx<'_>,
   #[description = "Channel to send this to"]
   #[channel_types("Text", "PublicThread", "PrivateThread")]
   channel: Option<GenericChannelId>
 ) -> AsahiResult {
+  use poise::Modal;
+
+  let modal = EchoModal::execute(ctx).await.expect("couldnt execute modal");
+
+  let message = match modal {
+    Some(m) => m.message,
+    None => {
+      warn!("Modal passed empty data, not sending anything!");
+      return Ok(())
+    }
+  };
+
   let channel = match channel {
     Some(c) => c,
     None => ctx.channel_id()

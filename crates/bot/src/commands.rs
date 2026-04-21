@@ -18,6 +18,7 @@ use {
 
 pub type PoiseCmdData = Vec<poise::Command<BotData, AsahiError>>;
 pub type PoiseContext<'a> = poise::Context<'a, BotData, AsahiError>;
+pub type PoiseAppCtx<'a> = poise::ApplicationContext<'a, BotData, AsahiError>;
 
 pub fn collect() -> PoiseCmdData { vec![deploy(), dev(), leaderboard(), botstats()] }
 
