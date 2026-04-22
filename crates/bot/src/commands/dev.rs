@@ -8,8 +8,10 @@ use {
   poise::{
     ChoiceParameter,
     CreateReply,
+    Modal,
     serenity_prelude::{
       CreateAllowedMentions,
+      EditMessage,
       GenericChannelId,
       MessageId,
       builder::CreateMessage
@@ -33,7 +35,7 @@ impl InfoChannel {
   }
 }
 
-#[derive(poise::Modal)]
+#[derive(Modal)]
 #[name = "Echo your message as a bot"]
 struct EchoModal {
   #[name = "Message to send"]
@@ -58,13 +60,12 @@ async fn echo(
   ctx: super::PoiseAppCtx<'_>,
   #[description = "Channel to send this to"]
   #[channel_types("Text", "PublicThread", "PrivateThread")]
-  channel: Option<GenericChannelId>
+  channel: Option<GenericChannelId>,
+  #[description = "Supply the Message ID if you want to edit its message"] message: Option<String>
 ) -> AsahiResult {
-  use poise::Modal;
-
   let modal = EchoModal::execute(ctx).await.expect("couldnt execute modal");
 
-  let message = match modal {
+  let modal_message = match modal {
     Some(m) => m.message,
     None => {
       warn!("Modal passed empty data, not sending anything!");
@@ -77,24 +78,49 @@ async fn echo(
     None => ctx.channel_id()
   };
 
-  match GenericChannelId::new(channel.get())
-    .send_message(
-      ctx.http(),
-      CreateMessage::new()
-        .content(message)
-        .allowed_mentions(CreateAllowedMentions::new().empty_roles().empty_users())
-    )
-    .await
-  {
-    Ok(_) => {
-      ctx.send(CreateReply::new().content("Sent!").ephemeral(true)).await.unwrap();
-    },
-    Err(y) => {
-      ctx
-        .send(CreateReply::new().content(format!("Failed... `{y}`")).ephemeral(true))
-        .await
-        .unwrap();
-      return Ok(());
+  let channel_id = GenericChannelId::new(channel.get());
+
+  let message_id = MessageId::new(
+    message
+      .as_ref()
+      .map(|m| m.parse::<u64>().expect("parsing fail"))
+      .expect("unable to get value")
+  );
+
+  let allowed_mentions = CreateAllowedMentions::new().empty_roles().empty_users();
+
+  let reply = |content: String| async move {
+    ctx.send(CreateReply::new().content(content).ephemeral(true)).await.unwrap();
+  };
+
+  if message.is_some() {
+    match channel_id
+      .edit_message(
+        ctx.http(),
+        message_id,
+        EditMessage::new().content(&modal_message).allowed_mentions(allowed_mentions.clone())
+      )
+      .await
+    {
+      Ok(_) => reply("Edited!".to_owned()).await,
+      Err(y) => {
+        reply(format!("Failed... `{y}`")).await;
+        return Ok(());
+      }
+    }
+  } else {
+    match channel_id
+      .send_message(
+        ctx.http(),
+        CreateMessage::new().content(&modal_message).allowed_mentions(allowed_mentions)
+      )
+      .await
+    {
+      Ok(_) => reply("Sent!".to_owned()).await,
+      Err(y) => {
+        reply(format!("Failed... `{y}`")).await;
+        return Ok(());
+      }
     }
   }
 
