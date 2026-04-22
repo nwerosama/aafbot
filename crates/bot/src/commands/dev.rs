@@ -80,12 +80,10 @@ async fn echo(
 
   let channel_id = GenericChannelId::new(channel.get());
 
-  let message_id = MessageId::new(
-    message
-      .as_ref()
-      .map(|m| m.parse::<u64>().expect("parsing fail"))
-      .expect("unable to get value")
-  );
+  let message_id = message
+    .as_ref()
+    .map(|i| MessageId::new(i.parse::<u64>().expect("not a valid snowflake")))
+    .expect("unable to get value");
 
   let allowed_mentions = CreateAllowedMentions::new().empty_roles().empty_users();
 
