@@ -21,7 +21,9 @@ use {
 };
 
 pub struct PollServers {
-  pub db: sqlx::PgPool
+  pub db:        sqlx::PgPool,
+  #[cfg(feature = "production")]
+  pub first_run: std::sync::atomic::AtomicBool
 }
 
 #[derive(Debug, Clone)]
@@ -89,6 +91,12 @@ impl AsahiCoordinator for PollServers {
   fn interval(&self) -> u64 { 60 }
 
   async fn main_loop(&self) -> AsahiResult {
+    #[cfg(feature = "production")]
+    if self.first_run.swap(false, std::sync::atomic::Ordering::SeqCst) {
+      info!("Sleeping until Tailscale is ready..");
+      tokio::time::sleep(tokio::time::Duration::from_secs(15)).await
+    }
+
     let db = &self.db.clone();
 
     match sqlx::query_as!(Server, "SELECT friendly, internal, ip, code FROM servers")
