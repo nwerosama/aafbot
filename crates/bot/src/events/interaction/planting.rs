@@ -47,6 +47,15 @@ struct MediaData {
   unix_ts: i64
 }
 
+/// Assets server manifest
+#[derive(serde::Deserialize)]
+struct Manifest {
+  /// Retrieved from `timestamp.txt`
+  timestamp: i64,
+  /// List of visible files in the directory
+  media:     Vec<String>
+}
+
 #[non_exhaustive]
 enum GuideKind {
   Planting,
@@ -66,21 +75,18 @@ impl std::fmt::Display for GuideKind {
   }
 }
 
-/// Fetches Unix epoch from `timestamp.txt` on asset server
-async fn fetch_unix_epoch(
-  url: &str,
+/// Fetches the timestamp and URLs from a generated manifest
+async fn get_manifest(
   guide_kind: GuideKind,
   server: &str
-) -> i64 {
-  reqwest::get(format!("{url}/files/{guide_kind}/{server}/timestamp.txt"))
+) -> Manifest {
+  let base = var("AAF_ASSETS").expect("No 'AAF_ASSETS' key found");
+  reqwest::get(format!("{base}/files/manifest/{guide_kind}/{server}"))
     .await
-    .expect("error fetching timestamp value")
-    .text()
+    .expect("error fetching manifest")
+    .json::<Manifest>()
     .await
-    .unwrap()
-    .trim()
-    .parse::<i64>()
-    .unwrap_or(0)
+    .expect("manifest not available")
 }
 
 fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
@@ -171,9 +177,9 @@ pub async fn planting_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
-  let base_url = var("AAF_ASSETS").expect("No 'AAF_ASSETS' key found");
-  let image_url = format!("{base_url}/files/planting/{server}/planting-guide.png");
-  let unix_ts = fetch_unix_epoch(&base_url, GuideKind::Planting, server).await;
+  let manifest = get_manifest(GuideKind::Planting, server).await;
+  let image_url = manifest.media.first().expect("no media in manifest").clone().to_string();
+  let unix_ts = manifest.timestamp;
 
   let data = match server {
     "grain22" => EmbedData {
@@ -223,42 +229,19 @@ pub async fn equipment_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
-  let base_url = var("AAF_ASSETS").expect("No 'AAF_ASSETS' key found");
-  let guide_url = format!("{base_url}/files/equipment/{server}");
-  let unix_ts = fetch_unix_epoch(&base_url, GuideKind::Equipment, server).await;
+  let manifest = get_manifest(GuideKind::Equipment, server).await;
+  let media = manifest.media;
+  let unix_ts = manifest.timestamp;
 
   let data = match server {
-    "grain22" => MediaData {
-      title: "Grain 22",
-      media: vec![],
-      unix_ts
-    },
-    "animals22" => MediaData {
-      title: "Animals 22",
-      media: vec![],
-      unix_ts
-    },
     "grain25" => MediaData {
       title: "Grain 25",
-      media: vec![
-        format!("{guide_url}/Grain_RiceCrops.png"),
-        format!("{guide_url}/Grain_RootCrops.png"),
-        format!("{guide_url}/Grain_RootCrops2.png"),
-        format!("{guide_url}/Grain_Sugar-1.png"),
-        format!("{guide_url}/Grain_Combines.png"),
-        format!("{guide_url}/Grain_Trucks.png"),
-      ],
+      media,
       unix_ts
     },
     "animals25" => MediaData {
       title: "Animals 25",
-      media: vec![
-        format!("{guide_url}/Animals_Bailing.png"),
-        format!("{guide_url}/Animals_Cotton.png"),
-        format!("{guide_url}/Animals_Harvest.png"),
-        format!("{guide_url}/Animals_Silage1.png"),
-        format!("{guide_url}/Animals_Silage2.png"),
-      ],
+      media,
       unix_ts
     },
     _ => return Ok(())
