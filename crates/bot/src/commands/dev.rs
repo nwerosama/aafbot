@@ -152,7 +152,7 @@ async fn ship_info(
 }
 
 /// Developer commands for the leaderboard system
-#[poise::command(slash_command, subcommands("timestamp", "transfer"))]
+#[poise::command(slash_command, subcommands("timestamp", "transfer", "destroy"))]
 pub async fn leaderboard(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
 /// Sets the timestamp for when leaderboard was last reset
@@ -224,6 +224,30 @@ async fn transfer(
     .reply(format!("Successfully transferred the data from **{from_name}** to **{name_b}**"))
     .await
     .unwrap();
+
+  Ok(())
+}
+
+/// Destroy the player's leaderboard data
+#[poise::command(slash_command)]
+async fn destroy(
+  ctx: super::PoiseContext<'_>,
+  #[description = "Player name to destroy their data"] player: String
+) -> AsahiResult {
+  let mut tx = ctx.data().database.begin().await?;
+
+  let sess = sqlx::query!("DELETE FROM sessions WHERE name = $1", player).execute(&mut *tx).await?;
+  let plr = sqlx::query!("DELETE FROM players WHERE name = $1", player).execute(&mut *tx).await?;
+
+  tx.commit().await.expect("error committing transaction");
+
+  let unaffected = sess.rows_affected() < 1 && plr.rows_affected() < 1;
+
+  if unaffected {
+    ctx.reply("Can't destroy data if it's not present!").await.unwrap();
+  } else {
+    ctx.reply("Data destroyed!").await.unwrap();
+  }
 
   Ok(())
 }
