@@ -134,10 +134,7 @@ macro_rules! fetch_api {
 
       match http_codes(res, url.clone()).await {
         Ok($expected_variant(d)) => Ok(d),
-        Err(e) => {
-          error!("error in {url}: {e:#?}");
-          Err(e)
-        }
+        Err(e) => Err(e)
       }
     }
   };
