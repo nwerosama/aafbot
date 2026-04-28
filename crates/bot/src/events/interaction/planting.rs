@@ -23,6 +23,7 @@ use {
     EditMessage,
     EmojiId,
     GenericChannelId,
+    Http,
     MessageFlags,
     MessageId,
     ReactionType,
@@ -89,6 +90,13 @@ async fn get_manifest(
     .expect("manifest not available")
 }
 
+async fn noop(
+  http: &Http,
+  interaction: &ComponentInteraction
+) {
+  let _ = interaction.create_response(http, CreateInteractionResponse::Acknowledge).await;
+}
+
 fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
   let fs22 = ReactionType::Custom {
     id:       EmojiId::new(ctx.data::<BotData>().emojis.fs22),
@@ -118,6 +126,7 @@ fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
       "planting-main",
       CreateSelectMenuKind::String {
         options: vec![
+          CreateSelectMenuOption::new("Select this to view again", "planting-noop").default_selection(true),
           CreateSelectMenuOption::new("Grain 22", "planting-grain22").emoji(fs22.clone()),
           CreateSelectMenuOption::new("Animals 22", "planting-animals22").emoji(fs22.clone()),
           CreateSelectMenuOption::new("Grain 25", "planting-grain25").emoji(fs25.clone()),
@@ -131,9 +140,10 @@ fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
       "equipment-main",
       CreateSelectMenuKind::String {
         options: vec![
-          // comment out the ones that we do not have images for
-          // CreateSelectMenuOption::new("Grain 22", "equipment-grain22").emoji(fs22.clone()),
-          // CreateSelectMenuOption::new("Animals 22", "equipment-animals22").emoji(fs22),
+          CreateSelectMenuOption::new("Select this to view again", "equipment-noop").default_selection(true),
+          CreateSelectMenuOption::new("Silage 22", "equipment-silage22").emoji(fs22.clone()),
+          CreateSelectMenuOption::new("Grain 22", "equipment-grain22").emoji(fs22.clone()),
+          CreateSelectMenuOption::new("Silage 25", "equipment-silage25").emoji(fs25.clone()),
           CreateSelectMenuOption::new("Grain 25", "equipment-grain25").emoji(fs25.clone()),
           CreateSelectMenuOption::new("Animals 25", "equipment-animals25").emoji(fs25),
         ]
@@ -177,6 +187,11 @@ pub async fn planting_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
+  if server == "noop" {
+    noop(&ctx.http, interaction).await;
+    return Ok(())
+  }
+
   let manifest = get_manifest(GuideKind::Planting, server).await;
   let image_url = manifest.media.first().expect("no media in manifest").clone().to_string();
   let unix_ts = manifest.timestamp;
@@ -229,11 +244,31 @@ pub async fn equipment_guide(
   interaction: &ComponentInteraction,
   server: &str
 ) -> AsahiResult {
+  if server == "noop" {
+    noop(&ctx.http, interaction).await;
+    return Ok(())
+  }
+
   let manifest = get_manifest(GuideKind::Equipment, server).await;
   let media = manifest.media;
   let unix_ts = manifest.timestamp;
 
   let data = match server {
+    "silage22" => MediaData {
+      title: "Silage 22",
+      media,
+      unix_ts
+    },
+    "silage25" => MediaData {
+      title: "Silage 25",
+      media,
+      unix_ts
+    },
+    "grain22" => MediaData {
+      title: "Grain 22",
+      media,
+      unix_ts
+    },
     "grain25" => MediaData {
       title: "Grain 25",
       media,
