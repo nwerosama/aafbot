@@ -17,3 +17,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   PRIMARY KEY (name, server),
   FOREIGN KEY (server) REFERENCES servers(internal)
 );
+
+CREATE INDEX IF NOT EXISTS idx_name ON players(name);
+
+REINDEX TABLE players;
