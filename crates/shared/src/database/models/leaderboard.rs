@@ -1,4 +1,9 @@
-#[derive(Debug, Clone)]
+use serde::{
+  Deserialize,
+  Serialize
+};
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PlayerLb {
   /// FS player name
   pub name:         String,
