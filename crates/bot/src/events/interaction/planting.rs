@@ -56,11 +56,11 @@ impl std::fmt::Display for GuideKind {
     &self,
     f: &mut std::fmt::Formatter<'_>
   ) -> std::fmt::Result {
-    let k = match self {
+    match self {
       Self::Planting => "planting",
       Self::Equipment => "equipment"
-    };
-    write!(f, "{k}")
+    }
+    .fmt(f)
   }
 }
 
