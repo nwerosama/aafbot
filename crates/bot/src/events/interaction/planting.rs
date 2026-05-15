@@ -1,6 +1,10 @@
 use {
   crate::data::BotData,
-  asahi::AsahiResult,
+  aaf_shared::assets::Manifest,
+  asahi::{
+    AsahiResult,
+    warn
+  },
   poise::serenity_prelude::{
     ComponentInteraction,
     Context,
@@ -34,27 +38,11 @@ use {
   std::env::var
 };
 
-/// Structure for Planting guide embeds
-struct EmbedData {
-  title:     &'static str,
-  image_url: String,
-  unix_ts:   i64
-}
-
-/// Structure for Equipment guide images
+/// Structure for guide images
 struct MediaData {
   title:   &'static str,
   media:   Vec<String>,
   unix_ts: i64
-}
-
-/// Assets server manifest
-#[derive(serde::Deserialize)]
-struct Manifest {
-  /// Retrieved from `timestamp.txt`
-  timestamp: i64,
-  /// List of visible files in the directory
-  media:     Vec<String>
 }
 
 #[non_exhaustive]
@@ -193,32 +181,37 @@ pub async fn planting_guide(
   }
 
   let manifest = get_manifest(GuideKind::Planting, server).await;
-  let image_url = manifest.media.first().expect("no media in manifest").clone().to_string();
+  let media = manifest.media;
   let unix_ts = manifest.timestamp;
 
   let data = match server {
-    "grain22" => EmbedData {
+    "grain22" => MediaData {
       title: "Grain 22",
-      image_url,
+      media,
       unix_ts
     },
-    "animals22" => EmbedData {
+    "animals22" => MediaData {
       title: "Animals 22",
-      image_url,
+      media,
       unix_ts
     },
-    "grain25" => EmbedData {
+    "grain25" => MediaData {
       title: "Grain 25",
-      image_url,
+      media,
       unix_ts
     },
-    "animals25" => EmbedData {
+    "animals25" => MediaData {
       title: "Animals 25",
-      image_url,
+      media,
       unix_ts
     },
     _ => return Ok(())
   };
+
+  if data.media.is_empty() {
+    warn!("Empty media for {server}, abort!");
+    return Ok(());
+  }
 
   interaction
     .create_response(
@@ -228,7 +221,7 @@ pub async fn planting_guide(
           CreateEmbed::default()
             .color(ctx.data::<BotData>().embed_color)
             .title(data.title)
-            .image(format!("{}?v={}", data.image_url, data.unix_ts))
+            .image(format!("{}?v={}", data.media.first().expect("no media in manifest"), data.unix_ts))
             .timestamp(Timestamp::from_unix_timestamp(data.unix_ts).expect("Time went on an adventure"))
         )
       )
@@ -283,7 +276,7 @@ pub async fn equipment_guide(
   };
 
   if data.media.is_empty() {
-    asahi::warn!("Empty media for {server}, abort!");
+    warn!("Empty media for {server}, abort!");
     return Ok(());
   }
 
