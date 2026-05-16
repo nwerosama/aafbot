@@ -11,6 +11,10 @@ use {
       CreateEmbed,
       CreateEmbedFooter
     }
+  },
+  std::time::{
+    SystemTime,
+    UNIX_EPOCH
   }
 };
 
@@ -114,7 +118,16 @@ async fn search(
     ];
 
     if let (Some(server), Some(date)) = (plr.last_seen_server, plr.last_seen_date) {
-      msg.insert(3, format!("**Last seen:** `{server}` (<t:{date}:R>)"));
+      let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+      let threshold = 120; // 2mins
+
+      let last_on = if now.saturating_sub(date) < threshold {
+        "playing".to_string()
+      } else {
+        format!("<t:{date}:R>")
+      };
+
+      msg.insert(3, format!("**Last seen:** `{server}` ({last_on})"));
     }
 
     ctx.send(CreateReply::default().content(msg.join("\n"))).await.unwrap();
