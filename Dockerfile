@@ -1,4 +1,4 @@
-FROM archlinux:base@sha256:ceac417c19645d21630c120fa123942aa1fc5988faab14e67222013cb11f31bb
+FROM archlinux:base@sha256:40ec92af4b7de7127251038f2e1af7978c1dbc1625e4c7d23b7a89eee05e5a58
 LABEL org.opencontainers.image.source="https://github.com/nwerosama/aafbot"
 ENV RUST_LOG=debug
 RUN pacman-key --init && \
