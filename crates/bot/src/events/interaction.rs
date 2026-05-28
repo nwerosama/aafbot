@@ -9,8 +9,8 @@ use {
     warn
   },
   planting::{
-    equipment_guide,
-    planting_guide
+    GuideKind,
+    unified_guide
   },
   poise::serenity_prelude::{
     ComponentInteractionDataKind,
@@ -27,22 +27,19 @@ pub async fn on_interaction(
     let id = cmpt.data.custom_id.as_str();
 
     match id {
-      "planting-main" => {
+      "planting-main" | "equipment-main" => {
         if let ComponentInteractionDataKind::StringSelect { values } = &cmpt.data.kind
           && let Some(chosen) = values.first()
         {
-          debug!("attempting to call planting_guide for {chosen}");
-          let server = chosen.strip_prefix("planting-").unwrap_or_default();
-          planting_guide(ctx, cmpt, server).await.unwrap()
-        }
-      },
-      "equipment-main" => {
-        if let ComponentInteractionDataKind::StringSelect { values } = &cmpt.data.kind
-          && let Some(chosen) = values.first()
-        {
-          debug!("attempting to call equipment_guide for {chosen}");
-          let server = chosen.strip_prefix("equipment-").unwrap_or_default();
-          equipment_guide(ctx, cmpt, server).await.unwrap()
+          let (kind, prefix) = if id == "planting-main" {
+            (GuideKind::Planting, "planting-")
+          } else {
+            (GuideKind::Equipment, "equipment-")
+          };
+
+          debug!("attempting to call unified_guide for {chosen}");
+          let server = chosen.strip_prefix(prefix).unwrap_or_default();
+          unified_guide(ctx, cmpt, kind, server).await.unwrap()
         }
       },
       _ => warn!("unimplemented route: {id}")

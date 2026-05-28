@@ -13,7 +13,6 @@ use {
     CreateComponent,
     CreateContainer,
     CreateContainerComponent,
-    CreateEmbed,
     CreateInteractionResponse,
     CreateInteractionResponseMessage,
     CreateMediaGallery,
@@ -27,11 +26,9 @@ use {
     EditMessage,
     EmojiId,
     GenericChannelId,
-    Http,
     MessageFlags,
     MessageId,
     ReactionType,
-    Timestamp,
     builder::CreateMessage,
     small_fixed_array::FixedString
   },
@@ -46,7 +43,7 @@ struct MediaData {
 }
 
 #[non_exhaustive]
-enum GuideKind {
+pub enum GuideKind {
   Planting,
   Equipment
 }
@@ -76,13 +73,6 @@ async fn get_manifest(
     .json::<Manifest>()
     .await
     .expect("manifest not available")
-}
-
-async fn noop(
-  http: &Http,
-  interaction: &ComponentInteraction
-) {
-  let _ = interaction.create_response(http, CreateInteractionResponse::Acknowledge).await;
 }
 
 fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
@@ -170,79 +160,18 @@ pub async fn planting_info_message(
   }
 }
 
-pub async fn planting_guide(
+pub async fn unified_guide(
   ctx: &Context,
   interaction: &ComponentInteraction,
+  guide_kind: GuideKind,
   server: &str
 ) -> AsahiResult {
   if server == "noop" {
-    noop(&ctx.http, interaction).await;
+    let _ = interaction.create_response(&ctx.http, CreateInteractionResponse::Acknowledge).await;
     return Ok(())
   }
 
-  let manifest = get_manifest(GuideKind::Planting, server).await;
-  let media = manifest.media;
-  let unix_ts = manifest.timestamp;
-
-  let data = match server {
-    "grain22" => MediaData {
-      title: "Grain 22",
-      media,
-      unix_ts
-    },
-    "animals22" => MediaData {
-      title: "Animals 22",
-      media,
-      unix_ts
-    },
-    "grain25" => MediaData {
-      title: "Grain 25",
-      media,
-      unix_ts
-    },
-    "animals25" => MediaData {
-      title: "Animals 25",
-      media,
-      unix_ts
-    },
-    _ => return Ok(())
-  };
-
-  if data.media.is_empty() {
-    warn!("Empty media for {server}, abort!");
-    return Ok(());
-  }
-
-  interaction
-    .create_response(
-      &ctx.http,
-      CreateInteractionResponse::Message(
-        CreateInteractionResponseMessage::default().ephemeral(true).add_embed(
-          CreateEmbed::default()
-            .color(ctx.data::<BotData>().embed_color)
-            .title(data.title)
-            .image(format!("{}?v={}", data.media.first().expect("no media in manifest"), data.unix_ts))
-            .timestamp(Timestamp::from_unix_timestamp(data.unix_ts).expect("Time went on an adventure"))
-        )
-      )
-    )
-    .await
-    .unwrap();
-
-  Ok(())
-}
-
-pub async fn equipment_guide(
-  ctx: &Context,
-  interaction: &ComponentInteraction,
-  server: &str
-) -> AsahiResult {
-  if server == "noop" {
-    noop(&ctx.http, interaction).await;
-    return Ok(())
-  }
-
-  let manifest = get_manifest(GuideKind::Equipment, server).await;
+  let manifest = get_manifest(guide_kind, server).await;
   let media = manifest.media;
   let unix_ts = manifest.timestamp;
 
@@ -267,6 +196,11 @@ pub async fn equipment_guide(
       media,
       unix_ts
     },
+    "animals22" => MediaData {
+      title: "Animals 22",
+      media,
+      unix_ts
+    },
     "animals25" => MediaData {
       title: "Animals 25",
       media,
@@ -277,7 +211,17 @@ pub async fn equipment_guide(
 
   if data.media.is_empty() {
     warn!("Empty media for {server}, abort!");
-    return Ok(());
+    interaction
+      .create_response(
+        &ctx.http,
+        CreateInteractionResponse::Message(
+          CreateInteractionResponseMessage::default()
+            .content("There's no media found for this server!")
+            .flags(MessageFlags::EPHEMERAL)
+        )
+      )
+      .await
+      .unwrap();
   }
 
   let items: Vec<CreateMediaGalleryItem> = data
