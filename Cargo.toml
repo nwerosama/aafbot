@@ -6,7 +6,7 @@ default-members = ["crates/bot"]
 [workspace.dependencies]
 aaf_shared = { path = "crates/shared" }
 asahi = { git = "https://git.playground.red/nwerosama/asahi", branch = "master", features = ["prober", "coordinator", "sqlx-pg"] }
-farmsim = { version = "0.2.2", features = ["fs22", "fs25"] }
+farmsim = { version = "0.2.3", features = ["fs22", "fs25"] }
 num-format = "0.4.4"
 serde = { version = "1.0.228", features = ["derive"] }
 sqlx = { version = "0.9.0", features = ["runtime-tokio", "postgres"] }
