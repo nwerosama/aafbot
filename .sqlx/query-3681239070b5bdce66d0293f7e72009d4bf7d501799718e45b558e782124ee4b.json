@@ -6,7 +6,13 @@
       {
         "ordinal": 0,
         "name": "total_played",
-        "type_info": "Int4"
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "players",
+            "name": "total_played"
+          }
+        }
       }
     ],
     "parameters": {

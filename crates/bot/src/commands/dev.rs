@@ -5,6 +5,7 @@ use {
     AsahiResult,
     warn
   },
+  farmsim::utils::fmt_uptime,
   poise::{
     ChoiceParameter,
     CreateReply,
@@ -187,13 +188,9 @@ async fn transfer(
 ) -> AsahiResult {
   let mut tx = ctx.data().database.begin().await?;
 
-  let from = sqlx::query_as!(
-    PlayerLb,
-    "SELECT name, total_played FROM players WHERE LOWER(name) LIKE $1",
-    name_a.trim().to_lowercase()
-  )
-  .fetch_optional(&mut *tx)
-  .await?;
+  let from = sqlx::query_as!(PlayerLb, "SELECT name, total_played FROM players WHERE name LIKE $1", name_a.trim())
+    .fetch_optional(&mut *tx)
+    .await?;
 
   let (from_name, from_value) = match from {
     Some(r) => (r.name, r.total_played),
@@ -205,6 +202,13 @@ async fn transfer(
       return Ok(());
     }
   };
+
+  let to_before = sqlx::query!("SELECT name, total_played FROM players WHERE name LIKE $1", name_b.trim())
+    .fetch_optional(&mut *tx)
+    .await?;
+
+  let to_before_val = to_before.as_ref().map(|r| r.total_played).unwrap_or(0);
+  let combined_val = from_value + to_before_val;
 
   sqlx::query_as!(
     PlayerLb,
@@ -221,7 +225,15 @@ async fn transfer(
   tx.commit().await?;
 
   ctx
-    .reply(format!("Successfully transferred the data from **{from_name}** to **{name_b}**"))
+    .reply(
+      [
+        "Data transferred successfully!",
+        &format!("- **{from_name}:** `{}`", fmt_uptime(from_value)),
+        &format!("- **{name_b}:** `{}`", fmt_uptime(to_before_val)),
+        &format!("Total combined: `{}`", fmt_uptime(combined_val))
+      ]
+      .join("\n")
+    )
     .await
     .unwrap();
 
