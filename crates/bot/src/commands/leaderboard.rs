@@ -92,15 +92,19 @@ async fn list(ctx: super::PoiseContext<'_>) -> AsahiResult {
 #[poise::command(slash_command)]
 async fn search(
   ctx: super::PoiseContext<'_>,
-  #[description = "In-game name to search for, e.g Nwero"] player_name: String
+  #[description = "In-game name to search for, e.g Nwero"] player_name: String,
+  #[description = "Lowercases the name to improve search accuracy (default off)"] lowercase: Option<bool>
 ) -> AsahiResult {
   let database = ctx.data().database.clone();
   let name = player_name.trim();
 
+  let lowercased = lowercase.unwrap_or(false);
+  let normalized_name = if lowercased { name.to_lowercase() } else { name.to_string() };
+
   let entry = sqlx::query_as!(
     Player,
     "SELECT name, total_played, last_seen_server, last_seen_date FROM players WHERE name = $1",
-    name
+    normalized_name
   )
   .fetch_optional(&database)
   .await?;
@@ -132,7 +136,7 @@ async fn search(
 
     ctx.send(CreateReply::default().content(msg.join("\n"))).await.unwrap();
   } else {
-    let suggested = sqlx::query!("SELECT name FROM players WHERE name LIKE $1 LIMIT 10", format!("%{name}%"))
+    let suggested = sqlx::query!("SELECT name FROM players WHERE name LIKE $1 LIMIT 10", format!("%{normalized_name}%"))
       .fetch_all(&database)
       .await?;
 
