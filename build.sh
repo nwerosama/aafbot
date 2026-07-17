@@ -6,4 +6,4 @@ COMMIT=$(git rev-parse --short HEAD)
 echo "Building on $TAG_NAME branch with commit hash $COMMIT"
 
 cargo build --locked -rF production && \
-docker build -t $REGISTRY:$TAG_NAME . && docker push $REGISTRY:$TAG_NAME
+podman build -t $REGISTRY:$TAG_NAME . && podman push $REGISTRY:$TAG_NAME
