@@ -50,7 +50,7 @@ async fn main() {
     main_guild:  if cfg!(feature = "production") {
       GuildId::new(1392400099258404976)
     } else {
-      GuildId::new(1488321772813291642)
+      GuildId::new(1160707095323222068)
     },
     notify_dev:  UserId::new(190407856527376384),
     database:    aaf_shared::database::init("AAFBot").await,
