@@ -1,6 +1,6 @@
 use {
   crate::events::planting_info_message,
-  aaf_shared::database::models::leaderboard::PlayerLb,
+  aaf_shared::database::models::leaderboard::PlayerPartial,
   asahi::{
     AsahiResult,
     warn
@@ -188,7 +188,7 @@ async fn transfer(
 ) -> AsahiResult {
   let mut tx = ctx.data().database.begin().await?;
 
-  let from = sqlx::query_as!(PlayerLb, "SELECT name, total_played FROM players WHERE name LIKE $1", name_a.trim())
+  let from = sqlx::query_as!(PlayerPartial, "SELECT name, total_played FROM players WHERE name LIKE $1", name_a.trim())
     .fetch_optional(&mut *tx)
     .await?;
 
@@ -211,7 +211,7 @@ async fn transfer(
   let combined_val = from_value + to_before_val;
 
   sqlx::query_as!(
-    PlayerLb,
+    PlayerPartial,
     "INSERT INTO players (name, total_played) VALUES ($1, $2) ON CONFLICT (name)
     DO UPDATE SET total_played = players.total_played + EXCLUDED.total_played",
     name_b,

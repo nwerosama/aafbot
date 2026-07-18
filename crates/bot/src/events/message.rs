@@ -7,6 +7,19 @@ use {
   }
 };
 
+pub async fn on_message(
+  ctx: &Context,
+  new_message: &Message
+) -> AsahiResult {
+  if new_message.author.bot() {
+    return Ok(());
+  }
+
+  autoresponder(ctx, new_message).await.unwrap();
+
+  Ok(())
+}
+
 async fn autoresponder(
   ctx: &Context,
   message: &Message
@@ -24,19 +37,6 @@ async fn autoresponder(
   {
     message.reply(&ctx.http, &row.response).await.unwrap();
   }
-
-  Ok(())
-}
-
-pub async fn on_message(
-  ctx: &Context,
-  new_message: &Message
-) -> AsahiResult {
-  if new_message.author.bot() {
-    return Ok(());
-  }
-
-  autoresponder(ctx, new_message).await.unwrap();
 
   Ok(())
 }

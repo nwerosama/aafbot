@@ -1,6 +1,7 @@
 mod interaction;
 mod message;
 mod ready;
+mod thread;
 
 // todo; move planting_info_message func to suitable place
 // in the future if we add more info channels to this bot
@@ -40,6 +41,7 @@ impl EventHandler for DiscordEvents {
         _ => ()
       },
       FullEvent::InteractionCreate { interaction, .. } => interaction::on_interaction(ctx, interaction).await.unwrap(),
+      FullEvent::ThreadCreate { thread, newly_created, .. } => thread::on_create(ctx, thread, newly_created).await.unwrap(),
       FullEvent::Message { new_message, .. } => message::on_message(ctx, new_message).await.unwrap(),
       _ => ()
     }

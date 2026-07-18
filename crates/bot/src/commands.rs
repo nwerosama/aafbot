@@ -1,6 +1,6 @@
 mod botstats;
 mod dev;
-mod leaderboard;
+pub mod leaderboard;
 
 use {
   botstats::botstats,

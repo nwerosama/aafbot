@@ -1,7 +1,8 @@
 use {
   aaf_shared::database::models::leaderboard::{
     LeaderboardConfig,
-    PlayerLb
+    PlayerFull,
+    PlayerPartial
   },
   asahi::AsahiResult,
   farmsim::utils::fmt_uptime,
@@ -18,20 +19,8 @@ use {
   }
 };
 
-#[derive(Debug, Clone)]
-struct Player {
-  /// FS player name
-  name:             String,
-  /// Session total in minutes
-  total_played:     i32,
-  /// Server name of where they were last seen on
-  last_seen_server: Option<String>,
-  /// Unix epoch of where they were last seen on
-  last_seen_date:   Option<i64>
-}
-
 fn slice_list(
-  entries: &[PlayerLb],
+  entries: &[PlayerPartial],
   start: usize
 ) -> String {
   entries
@@ -41,18 +30,53 @@ fn slice_list(
     .collect()
 }
 
+pub async fn player_card(
+  player: &PlayerFull,
+  database: &sqlx::Pool<sqlx::Postgres>
+) -> String {
+  let pos = sqlx::query_scalar!("SELECT COUNT(*) + 1 FROM players WHERE total_played > $1", player.total_played)
+    .fetch_one(database)
+    .await
+    .expect("failed to get position count")
+    .unwrap_or(1);
+
+  let mut msg = vec![
+    format!("**Position:** `#{pos}`"),
+    format!("**Player name:** `{}`", player.name),
+    format!("**Total played:** `{}`", fmt_uptime(player.total_played)),
+  ];
+
+  if let (Some(server), Some(date)) = (player.last_seen_server.clone(), player.last_seen_date) {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+    let threshold = 120; // 2mins
+
+    let last_on = if now.saturating_sub(date) < threshold {
+      "playing".to_string()
+    } else {
+      format!("<t:{date}:R>")
+    };
+
+    msg.insert(3, format!("**Last seen:** `{server}` ({last_on})"));
+  }
+
+  msg.join("\n")
+}
+
 /// Leaderboard commands
 #[poise::command(slash_command, subcommands("list", "search"))]
-pub async fn leaderboard(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
+pub(in crate::commands) async fn leaderboard(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
 /// View the top 50 players on the leaderboard
 #[poise::command(slash_command)]
 async fn list(ctx: super::PoiseContext<'_>) -> AsahiResult {
   let db = ctx.data().database.clone();
   let website = ctx.data().site_url.clone();
-  let entries = sqlx::query_as!(PlayerLb, "SELECT name, total_played FROM players ORDER BY total_played DESC LIMIT 50")
-    .fetch_all(&db)
-    .await?;
+  let entries = sqlx::query_as!(
+    PlayerPartial,
+    "SELECT name, total_played FROM players ORDER BY total_played DESC LIMIT 50"
+  )
+  .fetch_all(&db)
+  .await?;
 
   let date = sqlx::query_as!(LeaderboardConfig, "SELECT start_date FROM leaderboard_conf")
     .fetch_one(&db)
@@ -102,7 +126,7 @@ async fn search(
   let normalized_name = if lowercased { name.to_lowercase() } else { name.to_string() };
 
   let entry = sqlx::query_as!(
-    Player,
+    PlayerFull,
     "SELECT name, total_played, last_seen_server, last_seen_date FROM players WHERE name = $1",
     normalized_name
   )
@@ -110,31 +134,10 @@ async fn search(
   .await?;
 
   if let Some(plr) = entry {
-    let pos = sqlx::query_scalar!("SELECT COUNT(*) + 1 FROM players WHERE total_played > $1", plr.total_played)
-      .fetch_one(&database)
-      .await?
-      .unwrap_or(1);
-
-    let mut msg = vec![
-      format!("**Position:** `#{pos}`"),
-      format!("**Player name:** `{}`", plr.name),
-      format!("**Total played:** `{}`", fmt_uptime(plr.total_played)),
-    ];
-
-    if let (Some(server), Some(date)) = (plr.last_seen_server, plr.last_seen_date) {
-      let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
-      let threshold = 120; // 2mins
-
-      let last_on = if now.saturating_sub(date) < threshold {
-        "playing".to_string()
-      } else {
-        format!("<t:{date}:R>")
-      };
-
-      msg.insert(3, format!("**Last seen:** `{server}` ({last_on})"));
-    }
-
-    ctx.send(CreateReply::default().content(msg.join("\n"))).await.unwrap();
+    ctx
+      .send(CreateReply::default().content(player_card(&plr, &database).await))
+      .await
+      .unwrap();
   } else {
     let suggested = sqlx::query!("SELECT name FROM players WHERE name LIKE $1 LIMIT 10", format!("%{normalized_name}%"))
       .fetch_all(&database)
