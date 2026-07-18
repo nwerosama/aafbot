@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM players WHERE LOWER(name) = LOWER($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "players",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "total_played",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "players",
+            "name": "total_played"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "last_seen_server",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "players",
+            "name": "last_seen_server"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_seen_date",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "players",
+            "name": "last_seen_date"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "addd31ec2362d107e82430653896450a618d36a2ed966a8bd5e003c8b5eb7957"
+}
