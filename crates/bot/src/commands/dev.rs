@@ -81,10 +81,7 @@ async fn echo(
 
   let channel_id = GenericChannelId::new(channel.get());
 
-  let message_id = message
-    .as_ref()
-    .map(|i| MessageId::new(i.parse::<u64>().expect("not a valid snowflake")))
-    .expect("unable to get value");
+  let message_id = message.as_ref().map(|i| MessageId::new(i.parse::<u64>().expect("not a valid snowflake")));
 
   let allowed_mentions = CreateAllowedMentions::new().empty_roles().empty_users();
 
@@ -92,7 +89,7 @@ async fn echo(
     ctx.send(CreateReply::new().content(content).ephemeral(true)).await.unwrap();
   };
 
-  if message.is_some() {
+  if let Some(message_id) = message_id {
     match channel_id
       .edit_message(
         ctx.http(),
