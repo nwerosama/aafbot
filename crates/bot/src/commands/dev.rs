@@ -1,6 +1,9 @@
 use {
   crate::events::planting_info_message,
-  aaf_shared::database::models::leaderboard::PlayerPartial,
+  aaf_shared::{
+    database::models::leaderboard::PlayerPartial,
+    load_env
+  },
   asahi::{
     AsahiResult,
     warn
@@ -17,8 +20,7 @@ use {
       MessageId,
       builder::CreateMessage
     }
-  },
-  std::env::var
+  }
 };
 
 #[derive(ChoiceParameter)]
@@ -29,7 +31,7 @@ enum InfoChannel {
 impl InfoChannel {
   fn id(self) -> GenericChannelId {
     let id = match self {
-      Self::Planting => var("AAF_PLANTING_INFO").expect("No 'AAF_PLANTING_INFO' key found")
+      Self::Planting => load_env("AAF_PLANTING_INFO")
     };
 
     GenericChannelId::new(id.parse::<u64>().unwrap())

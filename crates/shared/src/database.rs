@@ -1,6 +1,7 @@
 pub mod models;
 
 use {
+  crate::load_env,
   asahi::{
     error,
     info,
@@ -12,8 +13,7 @@ use {
   sqlx::{
     Pool,
     Postgres
-  },
-  std::env::var
+  }
 };
 
 pub struct Database(String, String);
@@ -27,7 +27,7 @@ impl AsahiDatabaseConfig for Database {
 }
 
 pub async fn init(name: &str) -> Pool<Postgres> {
-  let uri = var("DATABASE_URL").expect("No 'DATABASE_URL' found!");
+  let uri = load_env("DATABASE_URL");
   let conf = Database(uri, name.to_owned());
 
   let pool = connect(&conf).await;

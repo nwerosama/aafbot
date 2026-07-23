@@ -1,6 +1,9 @@
 use {
   crate::data::BotData,
-  aaf_shared::assets::Manifest,
+  aaf_shared::{
+    assets::Manifest,
+    load_env
+  },
   asahi::{
     AsahiResult,
     warn
@@ -31,8 +34,7 @@ use {
     ReactionType,
     builder::CreateMessage,
     small_fixed_array::FixedString
-  },
-  std::env::var
+  }
 };
 
 /// Structure for guide images
@@ -66,7 +68,7 @@ async fn get_manifest(
   guide_kind: GuideKind,
   server: &str
 ) -> Manifest {
-  let base = var("AAF_ASSETS").expect("No 'AAF_ASSETS' key found");
+  let base = load_env("AAF_ASSETS");
   reqwest::get(format!("{base}/files/manifest/{guide_kind}/{server}"))
     .await
     .expect("error fetching manifest")
@@ -87,7 +89,7 @@ fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
     name:     Some(FixedString::from_str_trunc("fs25"))
   };
 
-  let handbook_url = var("AAF_PLANTING_HANDBOOK").expect("No 'AAF_PLANTING_HANDBOOK' key found");
+  let handbook_url = load_env("AAF_PLANTING_HANDBOOK");
 
   CreateComponent::Container(CreateContainer::new(vec![
     CreateContainerComponent::ActionRow(CreateActionRow::Buttons(

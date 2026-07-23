@@ -5,6 +5,7 @@ mod events;
 mod tasuku;
 
 use {
+  aaf_shared::load_env,
   asahi::{
     error,
     info,
@@ -32,7 +33,6 @@ use {
   },
   std::{
     borrow::Cow,
-    env::var,
     sync::Arc
   }
 };
@@ -54,7 +54,7 @@ async fn main() {
     },
     notify_dev:  UserId::new(190407856527376384),
     database:    aaf_shared::database::init("AAFBot").await,
-    site_url:    var("AAF_SITE").expect("No 'AAF_SITE' key found!"),
+    site_url:    load_env("AAF_SITE"),
     emojis:      Emojis {
       fs22: 1483331116227104851,
       fs25: 1483331150104756266

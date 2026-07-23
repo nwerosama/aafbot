@@ -3,7 +3,10 @@ use {
     commands::leaderboard::player_card,
     data::BotData
   },
-  aaf_shared::database::models::leaderboard::PlayerFull,
+  aaf_shared::{
+    database::models::leaderboard::PlayerFull,
+    load_env
+  },
   asahi::{
     AsahiResult,
     error,
@@ -18,21 +21,14 @@ use {
     GuildThread,
     UserId,
     small_fixed_array::FixedArray
-  },
-  std::env::var
+  }
 };
 
 static APPY_ID: UserId = UserId::new(853327905357561948);
 
 fn app_channels() -> Vec<GenericChannelId> {
-  let staff_apps_raw = var("AAF_STAFF_APPS")
-    .expect("No 'AAF_STAFF_APPS' key found")
-    .parse::<u64>()
-    .expect("parsing failed");
-  let plant_apps_raw = var("AAF_PLANTING_APPS")
-    .expect("No 'AAF_PLANTING_APPS' key found")
-    .parse::<u64>()
-    .expect("parsing failed");
+  let staff_apps_raw = load_env("AAF_STAFF_APPS").parse::<u64>().expect("parsing failed");
+  let plant_apps_raw = load_env("AAF_PLANTING_APPS").parse::<u64>().expect("parsing failed");
   vec![GenericChannelId::new(staff_apps_raw), GenericChannelId::new(plant_apps_raw)]
 }
 
@@ -100,10 +96,19 @@ pub async fn applications(
     .fetch_optional(&database)
     .await?
   else {
-    warn!(
-      "Player search yielded no results for {ign} - application {}:{} (ChID:MsgID)",
-      message.channel_id, message.id
-    );
+    let no_results = "Player search yieled no results for";
+
+    warn!("{no_results} {ign} - application {}:{} (ChID:MsgID)", message.channel_id, message.id);
+
+    let overseer = load_env("AAF_OVERSEER_CHAT").parse::<u64>().expect("unable to parse");
+    GenericChannelId::new(overseer)
+      .send_message(
+        &ctx.http,
+        CreateMessage::default().content(format!("{no_results} `{ign}` - {}", message.link()))
+      )
+      .await
+      .unwrap();
+
     return Ok(())
   };
 
