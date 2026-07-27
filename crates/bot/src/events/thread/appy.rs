@@ -96,7 +96,7 @@ pub async fn applications(
     .fetch_optional(&database)
     .await?
   else {
-    let no_results = "Player search yieled no results for";
+    let no_results = "Player search yielded no results for";
 
     warn!("{no_results} {ign} - application {}:{} (ChID:MsgID)", message.channel_id, message.id);
 
