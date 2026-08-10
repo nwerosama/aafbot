@@ -20,7 +20,9 @@ use {
       MessageId,
       builder::CreateMessage
     }
-  }
+  },
+  reqwest::StatusCode,
+  serde::Deserialize
 };
 
 #[derive(ChoiceParameter)]
@@ -36,6 +38,14 @@ impl InfoChannel {
 
     GenericChannelId::new(id.parse::<u64>().unwrap())
   }
+}
+
+#[derive(Debug, Deserialize)]
+struct ScheduleResponse {
+  #[serde(default)]
+  message: String,
+  #[serde(default)]
+  error:   String
 }
 
 #[derive(Modal)]
@@ -152,28 +162,37 @@ async fn ship_info(
 }
 
 /// Developer commands for the leaderboard system
-#[poise::command(slash_command, subcommands("timestamp", "transfer", "destroy"))]
+#[poise::command(slash_command, subcommands("reset", "transfer", "destroy"))]
 pub async fn leaderboard(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
-/// Sets the timestamp for when leaderboard was last reset
+/// Schedules a leaderboard reset on specified date
 #[poise::command(slash_command)]
-async fn timestamp(
+async fn reset(
   ctx: super::PoiseContext<'_>,
   #[description = "Unix epoch timestamp"] timestamp: u64
 ) -> AsahiResult {
-  sqlx::query_as!(
-    LeaderboardConfig,
-    "INSERT INTO leaderboard_conf (start_date) VALUES ($1)
-    ON CONFLICT (start_date) DO UPDATE SET start_date = EXCLUDED.start_date",
-    timestamp as i64
-  )
-  .execute(&ctx.data().database)
-  .await?;
+  let http = reqwest::Client::new();
+  let internal_api = load_env("AAF_INTERNAL_API");
 
-  ctx
-    .say(format!("Successfully set <t:{timestamp}:D> as the leaderboard's start date!"))
-    .await
-    .unwrap();
+  let req = http
+    .post(format!("{internal_api}/schedule/leaderboard/reset"))
+    .headers(crate::data::user_agent())
+    .json(&serde_json::json!({"execute_unix": timestamp}))
+    .send()
+    .await?;
+
+  let status = req.status();
+  let resp = req.json::<ScheduleResponse>().await?;
+
+  let m = match status {
+    StatusCode::CREATED => resp.message,
+    StatusCode::CONFLICT | StatusCode::BAD_REQUEST | StatusCode::INTERNAL_SERVER_ERROR => {
+      format!("**Internal API error:** `{}: {}`", status.as_str(), resp.error)
+    },
+    s => format!("Received an error not explicitly typed: `{s}`")
+  };
+
+  ctx.reply(m).await.expect("error sending message");
 
   Ok(())
 }
