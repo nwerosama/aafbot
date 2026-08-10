@@ -119,7 +119,7 @@ async fn main() {
   .framework(Box::new(framework))
   .data(bot_data)
   .status(OnlineStatus::Online)
-  .activity(ActivityData::custom("I love Taisho Sanke koi fish!"))
+  .activity(ActivityData::custom("Did you know Ogon is a golden koi?"))
   .await
   .expect("Error creating Serenity client");
 
