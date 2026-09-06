@@ -18,7 +18,8 @@ use {
       EditMessage,
       GenericChannelId,
       MessageId,
-      builder::CreateMessage
+      builder::CreateMessage,
+      small_fixed_array::FixedString
     }
   },
   reqwest::StatusCode,
@@ -55,7 +56,7 @@ struct EchoModal {
   #[placeholder = "Supports markdown only!"]
   #[max_length = 2000]
   #[paragraph]
-  message: String
+  message: FixedString<u16>
 }
 
 /// Developer commands to interact the bot with
