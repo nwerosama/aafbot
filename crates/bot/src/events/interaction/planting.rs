@@ -109,6 +109,7 @@ fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
           CreateSelectMenuOption::new("Select this to view again", "planting-noop").default_selection(true),
           CreateSelectMenuOption::new("Grain 22", "planting-grain22").emoji(fs22.clone()),
           CreateSelectMenuOption::new("Animals 22", "planting-animals22").emoji(fs22.clone()),
+          CreateSelectMenuOption::new("Silage 25", "planting-silage25").emoji(fs25.clone()),
           CreateSelectMenuOption::new("Grain 25", "planting-grain25").emoji(fs25.clone()),
           CreateSelectMenuOption::new("Animals 25", "planting-animals25").emoji(fs25.clone()),
         ]
