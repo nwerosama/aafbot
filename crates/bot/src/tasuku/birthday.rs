@@ -1,4 +1,5 @@
 use {
+  aaf_shared::load_env,
   asahi::{
     AsahiCoordinator,
     AsahiResult,
@@ -91,7 +92,10 @@ impl AsahiCoordinator for Birthday {
         CreateMessage::default()
           .components(vec![CreateComponent::Container(
             CreateContainer::new(vec![
-              CreateContainerComponent::TextDisplay(CreateTextDisplay::new("# :birthday: Birthday announcement!")),
+              CreateContainerComponent::TextDisplay(CreateTextDisplay::new(format!(
+                "# :birthday: Birthday announcement!\n-# <@&{}>",
+                load_env("AAF_ADMIN_ROLE")
+              ))),
               CreateContainerComponent::Separator(CreateSeparator::new().divider(true)),
               CreateContainerComponent::TextDisplay(CreateTextDisplay::new(bday_map)),
             ])
