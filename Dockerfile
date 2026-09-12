@@ -1,4 +1,4 @@
-FROM ghcr.io/void-linux/void-glibc-busybox:latest@sha256:e6244991ee577689a807f22480fdf6a4400859532cd0fcf6a89b9fd36f5e13be
+FROM ghcr.io/void-linux/void-glibc-busybox:latest@sha256:a2f034fb573a7758e0c85e41ef9284d3e57932ed9de357c1029fd46600294561
 LABEL org.opencontainers.image.source="https://github.com/nwerosama/aafbot"
 ENV RUST_LOG=debug
 RUN xbps-install -Syu libgcc

@@ -35,11 +35,8 @@ pub async fn fw_errors(error: FrameworkError<'_, BotData, AsahiError>) {
       }
     },
     FrameworkError::ArgumentParse { error, input, ctx, .. } => {
-      let input = input.unwrap_or_else(|| "<blank>".to_string());
-      if (ctx.reply(format!("Wrong command argument! Used `{input}`, error: `{error}`")))
-        .await
-        .is_err()
-      {
+      let input = input.unwrap_or_else(|| Box::new("<blank>".to_string()));
+      if (ctx.reply("Wrong command argument!")).await.is_err() {
         error!("PoiseArgumentParseError({input}): {error:?}")
       }
       error!("PoiseArgumentParseError({input}): {error:?}")
