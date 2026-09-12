@@ -137,6 +137,7 @@ async fn upcoming(ctx: super::PoiseAppCtx<'_>) -> AsahiResult {
   let mut later = Vec::new();
   let mut this_month = Vec::new();
   let mut next_month_list = Vec::new();
+  let mut next_year = Vec::new();
 
   for row in rows {
     let month = row.birth_date.month() as i32;
@@ -149,6 +150,8 @@ async fn upcoming(ctx: super::PoiseAppCtx<'_>) -> AsahiResult {
       this_month.push(line);
     } else if month == next_month {
       next_month_list.push(line);
+    } else if (month, day) < (current_month, current_day) {
+      next_year.push(line);
     } else {
       later.push(line);
     }
@@ -164,7 +167,8 @@ async fn upcoming(ctx: super::PoiseAppCtx<'_>) -> AsahiResult {
     ("Today", &today),
     ("This month", &this_month),
     ("Next month", &next_month_list),
-    ("Later this year", &later)
+    ("Later this year", &later),
+    ("Next year", &next_year)
   ] {
     if !l.is_empty() {
       if !first {
