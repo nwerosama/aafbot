@@ -1,5 +1,4 @@
 use {
-  crate::data::BotData,
   aaf_shared::{
     assets::Manifest,
     load_env
@@ -27,7 +26,6 @@ use {
     CreateTextDisplay,
     CreateUnfurledMediaItem,
     EditMessage,
-    EmojiId,
     GenericChannelId,
     MessageFlags,
     MessageId,
@@ -78,16 +76,7 @@ async fn get_manifest(
 }
 
 fn planting_components(ctx: &'_ Context) -> CreateComponent<'_> {
-  let fs22 = ReactionType::Custom {
-    id:       EmojiId::new(ctx.data::<BotData>().emojis.fs22),
-    animated: false,
-    name:     Some(FixedString::from_str_trunc("fs22"))
-  };
-  let fs25 = ReactionType::Custom {
-    id:       EmojiId::new(ctx.data::<BotData>().emojis.fs25),
-    animated: false,
-    name:     Some(FixedString::from_str_trunc("fs25"))
-  };
+  let (fs22, fs25) = super::util::fs_emojis(ctx);
 
   let handbook_url = load_env("AAF_PLANTING_HANDBOOK");
 

@@ -5,7 +5,10 @@ mod thread;
 
 // todo; move planting_info_message func to suitable place
 // in the future if we add more info channels to this bot
-pub use interaction::planting_info_message;
+pub use interaction::{
+  planting_info_message,
+  util
+};
 
 use {
   asahi::Probe,
