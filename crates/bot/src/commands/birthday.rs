@@ -73,7 +73,7 @@ async fn register(
     Ok(_) => {
       ctx
         .send(CreateReply::default().content(format!(
-          "Registered successfully! Your birthday is `{month}/{day}{}`",
+          "Registered successfully! Your birthday is `{day}/{month}{}`",
           if year > 1 { format!("/{year}") } else { String::new() }
         )))
         .await
