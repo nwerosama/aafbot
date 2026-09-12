@@ -2,12 +2,14 @@ mod birthday;
 mod botstats;
 mod dev;
 pub mod leaderboard;
+mod mentor;
 
 use {
   birthday::birthday,
   botstats::botstats,
   dev::dev,
-  leaderboard::leaderboard
+  leaderboard::leaderboard,
+  mentor::mentor
 };
 
 use {
@@ -22,7 +24,7 @@ pub type PoiseCmdData = Vec<poise::Command<BotData, AsahiError>>;
 pub type PoiseContext<'a> = poise::Context<'a, BotData, AsahiError>;
 pub type PoiseAppCtx<'a> = poise::ApplicationContext<'a, BotData, AsahiError>;
 
-pub fn collect() -> PoiseCmdData { vec![deploy(), dev(), leaderboard(), birthday(), botstats()] }
+pub fn collect() -> PoiseCmdData { vec![deploy(), dev(), leaderboard(), birthday(), botstats(), mentor()] }
 
 /// Deploy the commands
 #[poise::command(prefix_command, owners_only)]
