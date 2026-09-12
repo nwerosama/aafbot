@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO birthday_announcements (announced_on) VALUES (CURRENT_DATE) ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "148aa98991c68431bdd2338b1437da17e8281a55eefe54add48f9cadddd71937"
+}

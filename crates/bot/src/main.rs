@@ -66,8 +66,6 @@ async fn main() {
     std::process::exit(1)
   }
 
-  tasuku::init(bot_data.database.clone());
-
   let framework = Framework::builder()
     .options(FrameworkOptions {
       commands: commands::collect(),
@@ -117,11 +115,14 @@ async fn main() {
     probe: Arc::clone(&health_probe)
   }))
   .framework(Box::new(framework))
-  .data(bot_data)
+  .data(bot_data.clone())
   .status(OnlineStatus::Online)
   .activity(ActivityData::custom("Did you know Ogon is a golden koi?"))
   .await
   .expect("Error creating Serenity client");
+
+  let tasuku = tasuku::Tasuku::new(bot_data.clone(), client.http.clone());
+  tasuku.init();
 
   let exit_signal = tokio::spawn(async move { shutdown::gracefully_shutdown().await });
 

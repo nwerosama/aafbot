@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO birthdays (user_id, birth_date) VALUES ($1, MAKE_DATE($2, $3, $4))\n    ON CONFLICT (user_id) DO UPDATE SET birth_date = EXCLUDED.birth_date",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d1822366063537c15eb672ba8f5cc7643ee1af7bd2d98646acb0e18de2dd7d53"
+}

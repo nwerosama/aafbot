@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_id,\n      CASE WHEN EXTRACT(YEAR FROM birth_date) > 1 THEN EXTRACT(YEAR FROM CURRENT_DATE)::SMALLINT - EXTRACT(YEAR FROM birth_date)::SMALLINT END AS age\n      FROM birthdays WHERE EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM CURRENT_DATE)\n      AND (EXTRACT(DAY FROM birth_date) = EXTRACT(DAY FROM CURRENT_DATE) OR (\n        EXTRACT(MONTH FROM birth_date) = 2 AND EXTRACT(DAY FROM birth_date) = 29 AND EXTRACT(MONTH FROM CURRENT_DATE) = 2 AND EXTRACT(DAY FROM CURRENT_DATE) = 28\n        AND NOT (EXTRACT(YEAR FROM CURRENT_DATE)::INT % 4 = 0 AND (EXTRACT(YEAR FROM CURRENT_DATE)::INT % 100 != 0 OR EXTRACT(YEAR FROM CURRENT_DATE)::INT % 400 = 0))\n      ))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "birthdays",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "age",
+        "type_info": "Int2",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "7dfacb85682a782a216d9d362e03eac7da2d86e5ff3aaafec57943fce25d66a2"
+}

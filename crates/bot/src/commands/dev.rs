@@ -64,7 +64,7 @@ struct EchoModal {
   slash_command,
   owners_only,
   default_member_permissions = "ADMINISTRATOR",
-  subcommands("echo", "leaderboard", "ship_info")
+  subcommands("echo", "leaderboard", "birthday", "ship_info")
 )]
 pub async fn dev(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
@@ -162,7 +162,7 @@ async fn ship_info(
   Ok(())
 }
 
-/// Developer commands for the leaderboard system
+/// Developer commands for leaderboard system
 #[poise::command(slash_command, subcommands("reset", "transfer", "destroy"))]
 pub async fn leaderboard(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
 
@@ -280,5 +280,24 @@ async fn destroy(
     ctx.reply("Data destroyed!").await.unwrap();
   }
 
+  Ok(())
+}
+
+/// Developer commands for birthday system
+#[poise::command(slash_command, subcommands("channel"))]
+pub async fn birthday(_: super::PoiseContext<'_>) -> AsahiResult { Ok(()) }
+
+/// Set a channel to announce birthdays in
+#[poise::command(slash_command)]
+async fn channel(
+  ctx: super::PoiseContext<'_>,
+  #[description = "Which channel to post birthday announcements"]
+  #[channel_types("Text")]
+  channel: GenericChannelId
+) -> AsahiResult {
+  sqlx::query!("INSERT INTO birthday_conf (channel_id) VALUES ($1)", channel.get() as i64)
+    .execute(&ctx.data().database)
+    .await?;
+  ctx.reply("Successfully set the birthday announcement channel!").await.unwrap();
   Ok(())
 }

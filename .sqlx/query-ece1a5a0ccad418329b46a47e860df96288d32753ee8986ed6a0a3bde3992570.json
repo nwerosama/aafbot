@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXTRACT(MONTH FROM CURRENT_DATE)::INT AS m, EXTRACT(DAY FROM CURRENT_DATE)::INT AS d",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "m",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "d",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "ece1a5a0ccad418329b46a47e860df96288d32753ee8986ed6a0a3bde3992570"
+}
