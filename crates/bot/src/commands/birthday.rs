@@ -114,7 +114,7 @@ async fn upcoming(ctx: super::PoiseAppCtx<'_>) -> AsahiResult {
       (EXTRACT(MONTH FROM birth_date)::INT * 100 + EXTRACT(DAY FROM birth_date)::INT)
       - (EXTRACT(MONTH FROM CURRENT_DATE)::INT * 100 + EXTRACT(DAY FROM CURRENT_DATE)::INT)
       + 10_000
-    ) % 10_000 LIMIT 25"
+    ) % 10_000"
   )
   .fetch_all(&ctx.data().database)
   .await?;
