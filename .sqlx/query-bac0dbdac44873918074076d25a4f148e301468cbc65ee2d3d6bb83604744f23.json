@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT user_id, birth_date FROM birthdays ORDER BY (\n      (EXTRACT(MONTH FROM birth_date)::INT * 100 + EXTRACT(DAY FROM birth_date)::INT)\n      - (EXTRACT(MONTH FROM CURRENT_DATE)::INT * 100 + EXTRACT(DAY FROM CURRENT_DATE)::INT)\n      + 10_000\n    ) % 10_000 LIMIT 25",
+  "query": "SELECT user_id, birth_date FROM birthdays ORDER BY (\n      (EXTRACT(MONTH FROM birth_date)::INT * 100 + EXTRACT(DAY FROM birth_date)::INT)\n      - (EXTRACT(MONTH FROM CURRENT_DATE)::INT * 100 + EXTRACT(DAY FROM CURRENT_DATE)::INT)\n      + 10_000\n    ) % 10_000",
   "describe": {
     "columns": [
       {
@@ -34,5 +34,5 @@
       false
     ]
   },
-  "hash": "087f9b53f56cc42ec78d9ff097dc6dff671909a08ae11ec94e83bf6af6adb396"
+  "hash": "bac0dbdac44873918074076d25a4f148e301468cbc65ee2d3d6bb83604744f23"
 }
