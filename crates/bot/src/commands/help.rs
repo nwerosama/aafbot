@@ -11,7 +11,7 @@ use {
 };
 
 /// Reminder message for needing admin assistance
-#[poise::command(slash_command, rename = "help")]
+#[poise::command(slash_command)]
 pub async fn admin_help(ctx: super::PoiseAppCtx<'_>) -> AsahiResult {
   let admin_role = aaf_shared::load_env("AAF_ADMIN_ROLE");
   let (fs22, fs25) = crate::events::util::fs_emojis(ctx.serenity_context());
