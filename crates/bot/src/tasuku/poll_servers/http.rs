@@ -107,38 +107,28 @@ async fn http_codes(
   }
 }
 
-macro_rules! fetch_api {
-  (
-    $fn_name:ident,
-    $expected_variant:path,
-    $ok_ty:ty
-  ) => {
-    pub async fn $fn_name(url: String) -> AsahiResult<$ok_ty> {
-      let url: Uri = url.parse().unwrap();
+// Retrieves DSS data from the given URL and returns it
+pub async fn fetch_dss(url: String) -> AsahiResult<DssData> {
+  let url: Uri = url.parse().unwrap();
 
-      let mut sender = handshake(url.clone()).await?;
+  let mut sender = handshake(url.clone()).await?;
 
-      let req = request_builder(url.clone());
+  let req = request_builder(url.clone());
 
-      let res = match sender.send_request(req).await {
-        Ok(r) => r,
-        Err(e) => {
-          error!("({}) send request error: {e:?}", stringify!($fn_name));
-          return Err(e.into());
-        }
-      };
-
-      if !res.status().is_success() {
-        error!("({}) request failed with status: {}", stringify!($fn_name), res.status().as_str());
-      }
-
-      match http_codes(res, url.clone()).await {
-        Ok($expected_variant(d)) => Ok(d),
-        Err(e) => Err(e)
-      }
+  let res = match sender.send_request(req).await {
+    Ok(r) => r,
+    Err(e) => {
+      error!("({}) send request error: {e:?}", stringify!($fn_name));
+      return Err(e.into());
     }
   };
-}
 
-// Retrieves DSS data from the given URL and returns it
-fetch_api!(fetch_dss, DataKind::Dss, DssData);
+  if !res.status().is_success() {
+    error!("({}) request failed with status: {}", stringify!($fn_name), res.status().as_str());
+  }
+
+  match http_codes(res, url.clone()).await {
+    Ok(DataKind::Dss(d)) => Ok(d),
+    Err(e) => Err(e)
+  }
+}

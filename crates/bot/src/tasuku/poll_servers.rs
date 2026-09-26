@@ -33,7 +33,7 @@ struct Data {
 
 async fn fetch_data(server: Server) -> AsahiResult<Data> {
   let url = EndpointBuilder::new(&server.ip, &server.code).build();
-  let dss = fetch_dss(url.stats()).await?;
+  let dss = fetch_dss(url.stats(false)).await?;
   Ok(Data { dss: Some(dss) })
 }
 
