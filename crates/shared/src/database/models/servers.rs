@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::Deserialize;
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Server {
   /// Friendly server name, e.g. `Silage 25`
   pub friendly: String,
@@ -14,7 +16,7 @@ pub struct Server {
   pub code:     String
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ServerWithGameVersion {
   /// Friendly server name, e.g. `Silage 25`
   pub friendly:     String,
