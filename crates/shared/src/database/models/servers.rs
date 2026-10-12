@@ -31,5 +31,5 @@ pub struct ServerWithGameVersion {
   /// This is found in settings page in Dediserver webinterface
   pub code:         String,
   /// Game version, e.g. `25`
-  pub game_version: Option<i16>
+  pub game_version: i16
 }
