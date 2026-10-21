@@ -39,7 +39,6 @@ use {
 
 #[tokio::main]
 async fn main() {
-  asahi::utils::install_crypto_provider();
   asahi::log_init();
 
   let health_probe = Arc::new(asahi::Probe::new());
